@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid"
-import NextAuth, { AuthOptions } from "next-auth"
+import NextAuth, { AuthOptions, TokenSet } from "next-auth"
 import { Provider } from "next-auth/providers"
 import { headers } from "next/dist/client/components/headers"
 
@@ -47,7 +47,7 @@ const FidorProvider: Provider = {
                 }
 
                 const data = await res.json()
-                console.log(">>> tokens", data)
+                // console.log(">>> tokens", data)
 
                 return { tokens: data }
             } catch (error) {
@@ -74,7 +74,7 @@ const FidorProvider: Provider = {
                 )
 
                 const data = await res.json()
-                console.log(">>> user", JSON.stringify(data, null, 2))
+                // console.log(">>> user", JSON.stringify(data, null, 2))
                 return data
             } catch (error) {
                 console.error(error)
@@ -84,15 +84,51 @@ const FidorProvider: Provider = {
     },
     clientId: process.env.FIDOR_CLIENT_ID,
     clientSecret: process.env.FIDOR_CLIENT_SECRET,
-    profile(profile) {
+    profile(profile, tokens: TokenSet) {
+        console.log(">>> profile", profile)
+        console.log(">>> tokens", tokens)
         return {
             ...profile,
+            ...tokens,
         }
     },
 }
 
 export const authOptions: AuthOptions = {
+    secret: "secret",
     providers: [FidorProvider],
+    session: {
+        strategy: "jwt",
+    },
+    callbacks: {
+        async jwt({ token, user, account, profile }) {
+            if (account && user) {
+                token.accessToken = account.access_token
+                token.refreshToken = account.refresh_token
+                token.exp = account.expires_at
+				token.userId = user.id
+				token.userEmail = user.email
+
+                console.log(">>> jwt", token)
+                console.log(">>> user", user)
+                console.log(">>> account", account)
+                console.log(">>> profile", profile)
+            }
+
+            return token
+        },
+        async session({ session, token }) {
+            session.accessToken = token.accessToken
+            session.refreshToken = token.refreshToken
+            session.expiresAt = token.exp
+            session.user = {
+				id: token.userId,
+				email: token.userEmail,
+			}
+
+            return session
+        },
+    },
 }
 
 const handler = NextAuth(authOptions)
