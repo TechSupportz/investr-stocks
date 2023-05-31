@@ -12,7 +12,7 @@ const FidorProvider: Provider = {
         url: "https://apm.tp.sandbox.fidorfzco.com/oauth/authorize",
         params: {
             client_id: process.env.FIDOR_CLIENT_ID,
-            redirect_uri: `${process.env.NEXTAUTH_URL}/api/auth/callback/fidor`,
+            redirect_uri: `${process.env.BASE_URL}/api/auth/callback/fidor`,
             state: `${nanoid(10)}`,
             response_type: "code",
         },
@@ -22,7 +22,7 @@ const FidorProvider: Provider = {
             const params = {
                 grant_type: "authorization_code",
                 code: context.params.code ?? "",
-                redirect_uri: `${process.env.NEXTAUTH_URL}/api/auth/callback/fidor`,
+                redirect_uri: `${process.env.BASE_URL}/api/auth/callback/fidor`,
                 client_id: process.env.FIDOR_CLIENT_ID!,
             }
 
@@ -85,8 +85,6 @@ const FidorProvider: Provider = {
     clientId: process.env.FIDOR_CLIENT_ID,
     clientSecret: process.env.FIDOR_CLIENT_SECRET,
     profile(profile, tokens: TokenSet) {
-        console.log(">>> profile", profile)
-        console.log(">>> tokens", tokens)
         return {
             ...profile,
             ...tokens,
@@ -106,13 +104,8 @@ export const authOptions: AuthOptions = {
                 token.accessToken = account.access_token
                 token.refreshToken = account.refresh_token
                 token.exp = account.expires_at
-				token.userId = user.id
-				token.userEmail = user.email
-
-                console.log(">>> jwt", token)
-                console.log(">>> user", user)
-                console.log(">>> account", account)
-                console.log(">>> profile", profile)
+                token.userId = user.id
+                token.userEmail = user.email
             }
 
             return token
@@ -122,9 +115,9 @@ export const authOptions: AuthOptions = {
             session.refreshToken = token.refreshToken
             session.expiresAt = token.exp
             session.user = {
-				id: token.userId,
-				email: token.userEmail,
-			}
+                id: token.userId,
+                email: token.userEmail,
+            }
 
             return session
         },

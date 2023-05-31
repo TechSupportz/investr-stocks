@@ -4,15 +4,18 @@
     "private": true,
     "scripts": {
         "dev": "next dev",
+        "turbo": "next dev --turbo",
         "build": "next build",
         "start": "next start",
         "lint": "next lint"
     },
     "dependencies": {
+        "@heroicons/react": "^1.0.6",
         "@tremor/react": "^2.9.1",
         "@types/node": "20.2.5",
         "@types/react": "18.2.7",
         "@types/react-dom": "18.2.4",
+        "@uiball/loaders": "^1.2.6",
         "autoprefixer": "10.4.14",
         "nanoid": "^4.0.2",
         "next": "13.4.4",

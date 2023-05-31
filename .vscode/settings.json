@@ -1,3 +1,4 @@
 {
-    "cSpell.words": ["FIDOR"]
+    "cSpell.words": ["FIDOR", "investr"],
+    "typescript.tsdk": "node_modules\\typescript\\lib"
 }
