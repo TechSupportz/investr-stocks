@@ -24,6 +24,7 @@ function Navbar() {
                             <Title>
                                 <Link href="/news">News</Link>
                             </Title>
+							{/*NOTE - Remove this afterwards */}
                             <Title className="text-red-500">
                                 <Link href="/stocks/AAPL">TEST STOCK</Link>
                             </Title>
