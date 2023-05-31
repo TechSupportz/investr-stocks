@@ -24,14 +24,14 @@ export default async function Home() {
     if (!session) {
         return <Text>Not logged in</Text>
     }
-
+	
     const account = await getAccountDetails(session.accessToken)
 
     return (
         <div>
             <Text>{JSON.stringify(session, null, 2)}</Text>
             <br />
-            <Text>{JSON.stringify(account, null, 2)}</Text>
+            <Text>{account && JSON.stringify(account, null, 2)}</Text>
         </div>
     )
 }
