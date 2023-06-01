@@ -34,7 +34,7 @@ function StockPage({
                             : "1D"
                     }
                 />
-                {/* TODO - extract into a StockChart component  */}
+                {/* @ts-expect-error Async Server Component */}
                 <StockChart
                     ticker={params.id}
                     data={

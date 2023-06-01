@@ -1,10 +1,10 @@
 "use client"
 
 import {
-	LoginIcon,
-	LogoutIcon,
-	SearchIcon,
-	UserCircleIcon,
+    LoginIcon,
+    LogoutIcon,
+    SearchIcon,
+    UserCircleIcon,
 } from "@heroicons/react/outline"
 import { Button, TextInput, Title } from "@tremor/react"
 import { useSession } from "next-auth/react"
@@ -36,7 +36,9 @@ function Navbar() {
                             </Title>
                             {/*NOTE - Remove this afterwards */}
                             <Title className="text-red-500">
-                                <Link href="/stocks/AAPL">TEST STOCK</Link>
+                                <Link href="/stocks/AAPL?interval=5D&data=earnings&trade=buy">
+                                    TEST STOCK
+                                </Link>
                             </Title>
                         </div>
                     </div>

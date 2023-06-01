@@ -1,7 +1,8 @@
-import { DataInterval, DataType } from "@/types/stocks"
-import { Card, LineChart } from "@tremor/react"
+import { CompanyEarnings, DataInterval, DataType } from "@/types/stocks"
+import { BarChart, Card, LineChart } from "@tremor/react"
 import React from "react"
 import DataTypeToggle from "./DataTypeToggle"
+import { DateTime } from "luxon"
 
 interface StockChartProps {
     ticker: string
@@ -9,45 +10,43 @@ interface StockChartProps {
     data: DataType
 }
 
-const chartdata = [
-    {
-        year: 1970,
-        "Export Growth Rate": 2.04,
-        "Import Growth Rate": 1.53,
-    },
-    {
-        year: 1971,
-        "Export Growth Rate": 1.96,
-        "Import Growth Rate": 1.58,
-    },
-    {
-        year: 1972,
-        "Export Growth Rate": 1.96,
-        "Import Growth Rate": 1.61,
-    },
-    {
-        year: 1973,
-        "Export Growth Rate": 1.93,
-        "Import Growth Rate": 1.61,
-    },
-    {
-        year: 1974,
-        "Export Growth Rate": 1.88,
-        "Import Growth Rate": 1.67,
-    },
-]
+async function getCompanyEarnings(ticker: string) {
+    const res = await fetch(
+        `https://www.alphavantage.co/query?function=EARNINGS&symbol=${ticker}&apikey=${process.env.ALPHAVANTAGE_API_KEY}}`,
+    )
 
-function StockChart(props: StockChartProps) {
+    const data: CompanyEarnings = await res.json()
+
+    if (!res.ok) {
+        throw data
+    }
+
+    data.annualEarnings = data.annualEarnings.map(earnings => {
+        return {
+            ...earnings,
+            fiscalDateEnding: DateTime.fromISO(
+                earnings.fiscalDateEnding,
+            ).toFormat("yyyy"),
+        }
+    })
+
+    return data
+}
+
+async function StockChart(props: StockChartProps) {
+    const earnings = await getCompanyEarnings(props.ticker)
+
     return (
         <Card className="h-[55%]">
-            <div className="flex mb-4">
+            <div className="mb-4 w-full items-end justify-end">
                 <DataTypeToggle />
             </div>
-            <LineChart
-                data={chartdata}
-                index="year"
+            <BarChart
+                data={earnings.annualEarnings}
+                categories={["reportedEPS"]}
+                index="fiscalDateEnding"
+                yAxisWidth={16}
                 showLegend={false}
-                categories={["Export Growth Rate", "Import Growth Rate"]}
             />
         </Card>
     )

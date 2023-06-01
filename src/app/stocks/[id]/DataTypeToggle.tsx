@@ -8,15 +8,19 @@ function DataTypeToggle() {
     const pathname = usePathname()
     const searchParams = useSearchParams()
 
+    const newSearchParams = new URLSearchParams(searchParams.toString())
+
     const toggleDataType = (value: string) => {
-        const newSearchParams = new URLSearchParams(searchParams.toString())
         newSearchParams.set("data", value)
 
         router.push(`${pathname}?${newSearchParams.toString()}`)
     }
 
     return (
-        <Toggle color="zinc" defaultValue="1" onValueChange={toggleDataType}>
+        <Toggle
+            color="zinc"
+            defaultValue={searchParams.get("data") ?? "stocks"}
+            onValueChange={toggleDataType}>
             <ToggleItem value="stocks" text="Stocks" />
             <ToggleItem value="earnings" text="Earnings" />
         </Toggle>

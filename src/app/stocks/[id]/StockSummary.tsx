@@ -48,22 +48,28 @@ async function getStockSummary(ticker: string) {
         throw new Error("Failed to fetch stock summary json")
     }
 
-    console.log(
-        ">>> Response Data",
-        intraday["Time Series (1min)"][
-            Object.keys(intraday["Time Series (1min)"])[0]
-        ]["1. open"],
+	if (intraday.Note || quote.Note || overview.Note) {
+		throw new Error("Alpha Vantage API rate limit exceeded")
+	}
 
-        quote["Global Quote"]["08. previous close"],
+    // console.log(
+    //     ">>> Response Data",
+    //     intraday["Time Series (1min)"][
+    //         Object.keys(intraday["Time Series (1min)"])[0]
+    //     ]["1. open"],
 
-        intraday["Time Series (1min)"][
-            Object.keys(intraday["Time Series (1min)"])[0]
-        ]["5. volume"],
+    //     quote["Global Quote"]["08. previous close"],
 
-        intraday["Time Series (1min)"][
-            Object.keys(intraday["Time Series (1min)"])[1]
-        ]["5. volume"],
-    )
+    //     intraday["Time Series (1min)"][
+    //         Object.keys(intraday["Time Series (1min)"])[0]
+    //     ]["5. volume"],
+
+    //     intraday["Time Series (1min)"][
+    //         Object.keys(intraday["Time Series (1min)"])[1]
+    //     ]["5. volume"],
+    // )
+
+	// console.log(">>> Response Data", intraday, quote, overview)
 
     const response: StockSummaryType = {
         company: overview.Name,
@@ -71,20 +77,22 @@ async function getStockSummary(ticker: string) {
             current: parseFloat(
                 intraday["Time Series (1min)"][
                     Object.keys(intraday["Time Series (1min)"])[0]
-                ]["1. open"],
+                ]["1. open"] ?? 0,
             ),
-            previous: parseFloat(quote["Global Quote"]["08. previous close"]),
+            previous: parseFloat(
+                quote["Global Quote"]["08. previous close"] ?? 0,
+            ),
         },
         volume: {
             current: parseFloat(
                 intraday["Time Series (1min)"][
                     Object.keys(intraday["Time Series (1min)"])[0]
-                ]["5. volume"],
+                ]["5. volume"] ?? 0,
             ),
             previous: parseFloat(
                 intraday["Time Series (1min)"][
                     Object.keys(intraday["Time Series (1min)"])[1]
-                ]["5. volume"],
+                ]["5. volume"] ?? 0,
             ),
         },
     }

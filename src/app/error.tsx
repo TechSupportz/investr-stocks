@@ -1,7 +1,7 @@
 "use client"
 
-function error() {
-    return <div>error</div>
+function error(error: Error) {
+    return <p className="text-3xl text-red-400">{error.message}</p>
 }
 
 export default error
