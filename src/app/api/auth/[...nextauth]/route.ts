@@ -1,5 +1,7 @@
+import { DateTime } from "luxon"
 import { nanoid } from "nanoid"
 import NextAuth, { AuthOptions, TokenSet } from "next-auth"
+import { JWT } from "next-auth/jwt"
 import { Provider } from "next-auth/providers"
 import { headers } from "next/dist/client/components/headers"
 
@@ -39,6 +41,7 @@ const FidorProvider: Provider = {
                                 `${process.env.FIDOR_CLIENT_ID}:${process.env.FIDOR_CLIENT_SECRET}`,
                             ).toString("base64")}`,
                         },
+                        cache: "no-store",
                     },
                 )
 
@@ -47,9 +50,15 @@ const FidorProvider: Provider = {
                 }
 
                 const data = await res.json()
-                // console.log(">>> tokens", data)
 
-                return { tokens: data }
+                return {
+                    tokens: {
+                        access_token: data.access_token,
+                        refresh_token: data.refresh_token,
+                        expires_at: data.expires_in,
+                        state: data.state,
+                    },
+                }
             } catch (error) {
                 console.error(error)
                 throw new Error("Failed to fetch tokens from Fidor")
@@ -70,6 +79,7 @@ const FidorProvider: Provider = {
                             accept: "application/vnd.fidor.de; version=1,text/json",
                             "content-type": "application/json",
                         },
+                        cache: "no-store",
                     },
                 )
 
@@ -92,6 +102,44 @@ const FidorProvider: Provider = {
     },
 }
 
+async function refreshAccessToken(token: JWT): Promise<JWT> {
+    const params = {
+        grant_type: "refresh_token",
+        refresh_token: token.refreshToken,
+    }
+
+    try {
+        const res = await fetch(
+            `https://apm.tp.sandbox.fidorfzco.com/oauth/token?${new URLSearchParams(
+                params,
+            ).toString()}`,
+            {
+                method: "POST",
+                cache: "no-store",
+            },
+        )
+
+        if (!res.ok) {
+            throw new Error("Failed to refresh tokens from Fidor")
+        }
+
+        const data = await res.json()
+
+        return {
+            ...token,
+            accessToken: data.access_token,
+            refreshToken: data.refresh_token,
+            expiresAt: DateTime.now()
+                .plus({ seconds: data.expires_in })
+                .toMillis(),
+            state: data.state,
+        }
+    } catch (error) {
+        console.error(error)
+        throw new Error("Failed to fetch tokens from Fidor")
+    }
+}
+
 export const authOptions: AuthOptions = {
     secret: "secret",
     providers: [FidorProvider],
@@ -100,20 +148,27 @@ export const authOptions: AuthOptions = {
     },
     callbacks: {
         async jwt({ token, user, account, profile }) {
+            // initial sign in
             if (account && user) {
                 token.accessToken = account.access_token
                 token.refreshToken = account.refresh_token
-                token.exp = account.expires_at
+                token.expiresAt = DateTime.now()
+                    .plus({ seconds: account.expires_at })
+                    .toMillis()
                 token.userId = user.id
                 token.userEmail = user.email
             }
 
-            return token
+            if (DateTime.now().toMillis() < token.expiresAt) {
+                return token
+            }
+
+            return refreshAccessToken(token)
         },
         async session({ session, token }) {
             session.accessToken = token.accessToken
             session.refreshToken = token.refreshToken
-            session.expiresAt = token.exp
+            session.expiresAt = token.expiresAt
             session.user = {
                 id: token.userId,
                 email: token.userEmail,

@@ -1,3 +1,4 @@
+import NextAuthProvider from "./NextAuthProvider"
 import Navbar from "./components/navbar"
 import "./globals.css"
 import { Inter } from "next/font/google"
@@ -17,8 +18,12 @@ export default function RootLayout({
     return (
         <html lang="en" className={inter.className}>
             <body>
-                <Navbar />
-                <div className="m-auto h-[85vh] max-w-[1536px]">{children}</div>
+                <NextAuthProvider>
+                    <Navbar />
+                    <div className="m-auto h-[85vh] max-w-[1536px]">
+                        {children}
+                    </div>
+                </NextAuthProvider>
             </body>
         </html>
     )

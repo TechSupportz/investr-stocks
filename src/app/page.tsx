@@ -8,6 +8,7 @@ async function getAccountDetails(access_token: string) {
         headers: {
             authorization: `Bearer ${access_token}`,
         },
+		cache: "no-store"
     })
 
     if (!res.ok) {
