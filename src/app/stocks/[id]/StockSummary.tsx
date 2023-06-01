@@ -18,7 +18,7 @@ interface StockSummaryProps {
 }
 
 async function getStockSummary(ticker: string) {
-	console.log("fetching stock summary")
+    console.log("fetching stock summary")
     const intradayRes = await fetch(
         `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${ticker}&interval=1min&apikey=${process.env.ALPHA_VANTAGE_API_KEY}`,
         {
@@ -100,8 +100,8 @@ async function StockSummary(props: StockSummaryProps) {
 
     return (
         <Card className="flex h-[20%] items-center gap-8">
-            <div className="flex-grow-[2] space-y-1">
-                <Metric className="text-4xl">
+            <div className="flex-grow-1 max-w-sm space-y-1">
+                <Metric className="truncate text-4xl">
                     {stockSummary.company ?? props.ticker}
                 </Metric>
                 <Text
