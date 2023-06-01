@@ -136,7 +136,7 @@ async function refreshAccessToken(token: JWT) {
         ...token,
         accessToken: data.access_token,
         refreshToken: data.refresh_token,
-        expiresAt: DateTime.now().plus({ seconds: 10 }).toMillis(),
+        expiresAt: DateTime.now().plus({ seconds: data.expires_in }).toMillis(),
         state: token.state,
     }
 }
@@ -154,7 +154,7 @@ export const authOptions: AuthOptions = {
                 token.accessToken = account.access_token
                 token.refreshToken = account.refresh_token
                 token.expiresAt = DateTime.now()
-                    .plus({ seconds: 20 })
+                    .plus({ seconds: account.expires_at })
                     .toMillis()
                 token.userId = user.id
                 token.userEmail = user.email
