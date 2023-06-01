@@ -19,8 +19,8 @@ function StockPage({
     searchParams: searchParams
 }) {
     return (
-        <div className="flex h-full gap-6">
-            <div className="flex h-full w-[70%] flex-col gap-6">
+        <div className="flex h-full gap-4">
+            <div className="flex h-full w-[70%] flex-col gap-4">
                 {/* @ts-expect-error Async Server Component */}
                 <StockSummary
                     ticker={params.id}
@@ -56,7 +56,7 @@ function StockPage({
                             : "1D"
                     }
                 />
-                <div className="flex h-[25%] gap-6">
+                <div className="flex h-[25%] gap-4">
                     {/* TODO - Probably can map this with API response */}
                     <ListCard
                         items={[
@@ -100,7 +100,7 @@ function StockPage({
                     />
                 </div>
             </div>
-            <div className="flex h-full w-[30%] flex-col gap-6">
+            <div className="flex h-full w-[30%] flex-col gap-4">
                 <Card className="h-3/5" />
                 <Card className="h-2/5" />
             </div>

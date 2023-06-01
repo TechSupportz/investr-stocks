@@ -11,7 +11,7 @@ interface ListCardProps {
 
 function ListCard(props: ListCardProps) {
     return (
-        <Card>
+        <Card className="px-5 py-2">
             <List>
                 {props.items.map(item => (
                     <ListItem>

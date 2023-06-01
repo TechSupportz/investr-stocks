@@ -22,7 +22,7 @@ async function getStockSummary(ticker: string) {
     const intradayRes = await fetch(
         `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${ticker}&interval=1min&apikey=${process.env.ALPHA_VANTAGE_API_KEY}`,
         {
-            next: { revalidate: 60 },
+            next: { revalidate: 500 },
         },
     )
 
@@ -143,8 +143,8 @@ async function StockSummary(props: StockSummaryProps) {
                     </BadgeDelta>
                 </div>
                 <div className="flex items-baseline justify-start space-x-3 truncate">
-                    <Metric>${stockSummary.sharePrice.current}</Metric>
-                    <Text>from ${stockSummary.sharePrice.previous}</Text>
+                    <Metric>${stockSummary.sharePrice.current.toFixed(2)}</Metric>
+                    <Text>from ${stockSummary.sharePrice.previous.toFixed(2)}</Text>
                 </div>
             </Card>
             <Card className="px-5 py-4">
