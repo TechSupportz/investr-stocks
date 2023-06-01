@@ -2,11 +2,12 @@ import { BadgeDelta, Card, List, ListItem, Metric, Text } from "@tremor/react"
 import ListCard from "./ListCard"
 import StockSummary from "./StockSummary"
 import { DataInterval, DataType, TradeType } from "@/types/stocks"
+import StockChart from "./StockChart"
 
 interface searchParams {
     interval?: DataInterval
-	data?: DataType
-	trade?: TradeType
+    data?: DataType
+    trade?: TradeType
     [key: string]: string | string[] | undefined
 }
 
@@ -20,7 +21,7 @@ function StockPage({
     return (
         <div className="flex h-full gap-6">
             <div className="flex h-full w-[70%] flex-col gap-6">
-                {/* TODO - Replace with API data */}
+                {/* @ts-expect-error Async Server Component */}
                 <StockSummary
                     ticker={params.id}
                     interval={
@@ -34,7 +35,27 @@ function StockPage({
                     }
                 />
                 {/* TODO - extract into a StockChart component  */}
-                <Card className="h-[55%]">Graph</Card>
+                <StockChart
+                    ticker={params.id}
+                    data={
+                        searchParams.data
+                            ? ["stocks", "earnings"].includes(
+                                  searchParams.data.toLowerCase(),
+                              )
+                                ? searchParams.data
+                                : "stocks"
+                            : "stocks"
+                    }
+                    interval={
+                        searchParams?.interval
+                            ? ["1D", "5D", "1M", "6M", "1Y", "MAX"].includes(
+                                  searchParams?.interval.toUpperCase() as DataInterval,
+                              )
+                                ? (searchParams.interval.toUpperCase() as DataInterval)
+                                : "1D"
+                            : "1D"
+                    }
+                />
                 <div className="flex h-[25%] gap-6">
                     {/* TODO - Probably can map this with API response */}
                     <ListCard

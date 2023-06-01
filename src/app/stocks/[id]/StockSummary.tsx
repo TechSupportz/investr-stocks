@@ -18,76 +18,89 @@ interface StockSummaryProps {
 }
 
 async function getStockSummary(ticker: string) {
-    try {
-        const intradayRes = await fetch(
-            `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${ticker}&interval=1min&apikey=${process.env.ALPHA_VANTAGE_API_KEY}`,
-            {
-                next: { revalidate: 60 },
-            },
-        )
+	console.log("fetching stock summary")
+    const intradayRes = await fetch(
+        `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${ticker}&interval=1min&apikey=${process.env.ALPHA_VANTAGE_API_KEY}`,
+        {
+            next: { revalidate: 60 },
+        },
+    )
 
-        const quoteRes = await fetch(
-            `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${ticker}&apikey=${process.env.ALPHA_VANTAGE_API_KEY}`,
-        )
+    const quoteRes = await fetch(
+        `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${ticker}&apikey=${process.env.ALPHA_VANTAGE_API_KEY}`,
+    )
 
-        const overviewRes = await fetch(
-            `https://www.alphavantage.co/query?function=OVERVIEW&symbol=${ticker}&apikey=${process.env.ALPHA_VANTAGE_API_KEY}`,
-        )
+    const overviewRes = await fetch(
+        `https://www.alphavantage.co/query?function=OVERVIEW&symbol=${ticker}&apikey=${process.env.ALPHA_VANTAGE_API_KEY}`,
+    )
 
-        if (!intradayRes.ok || !quoteRes.ok || !overviewRes.ok) {
-            throw new Error("API call failed")
-        }
-
-        const [intraday, quote, overview] = await Promise.all([
-            intradayRes.json(),
-            quoteRes.json(),
-            overviewRes.json(),
-        ])
-
-        const response: StockSummaryType = {
-            company: overview.Name,
-            sharePrice: {
-                current: parseFloat(
-                    intraday["Time Series (1min)"][
-                        Object.keys(intraday["Time Series (1min)"])[0]
-                    ]["1. open"],
-                ),
-                previous: parseFloat(
-                    quote["Global Quote"]["08. previous close"],
-                ),
-            },
-            volume: {
-                current: parseFloat(
-                    intraday["Time Series (1min)"][
-                        Object.keys(intraday["Time Series (1min)"])[0]
-                    ]["5. volume"],
-                ),
-                previous: parseFloat(
-                    intraday["Time Series (1min)"][
-                        Object.keys(intraday["Time Series (1min)"])[1]
-                    ]["5. volume"],
-                ),
-            },
-        }
-
-        console.log(response)
-
-        return response
-    } catch (error) {
-        console.error(error)
+    if (!intradayRes.ok || !quoteRes.ok || !overviewRes.ok) {
+        throw new Error("Failed to fetch stock summary")
     }
+
+    const [intraday, quote, overview] = await Promise.all([
+        intradayRes.json(),
+        quoteRes.json(),
+        overviewRes.json(),
+    ])
+
+    if (!intraday || !quote || !overview) {
+        throw new Error("Failed to fetch stock summary json")
+    }
+
+    console.log(
+        ">>> Response Data",
+        intraday["Time Series (1min)"][
+            Object.keys(intraday["Time Series (1min)"])[0]
+        ]["1. open"],
+
+        quote["Global Quote"]["08. previous close"],
+
+        intraday["Time Series (1min)"][
+            Object.keys(intraday["Time Series (1min)"])[0]
+        ]["5. volume"],
+
+        intraday["Time Series (1min)"][
+            Object.keys(intraday["Time Series (1min)"])[1]
+        ]["5. volume"],
+    )
+
+    const response: StockSummaryType = {
+        company: overview.Name,
+        sharePrice: {
+            current: parseFloat(
+                intraday["Time Series (1min)"][
+                    Object.keys(intraday["Time Series (1min)"])[0]
+                ]["1. open"],
+            ),
+            previous: parseFloat(quote["Global Quote"]["08. previous close"]),
+        },
+        volume: {
+            current: parseFloat(
+                intraday["Time Series (1min)"][
+                    Object.keys(intraday["Time Series (1min)"])[0]
+                ]["5. volume"],
+            ),
+            previous: parseFloat(
+                intraday["Time Series (1min)"][
+                    Object.keys(intraday["Time Series (1min)"])[1]
+                ]["5. volume"],
+            ),
+        },
+    }
+
+    console.log(">>> Response", response)
+
+    return response
 }
 
 async function StockSummary(props: StockSummaryProps) {
     const stockSummary = await getStockSummary(props.ticker)
-
-    if (!stockSummary) {
-        throw new Error("Stock summary is undefined")
-    }
+    console.log(stockSummary)
 
     return (
         <Card className="flex h-[20%] items-center gap-8">
-            <div className="w-auto flex-grow space-y-1">
+            <div className="flex-grow-[2] space-y-1">
                 <Metric className="text-4xl">
                     {stockSummary.company ?? props.ticker}
                 </Metric>
@@ -128,7 +141,7 @@ async function StockSummary(props: StockSummaryProps) {
             </Card>
             <Card className="px-5 py-4">
                 <div className="flex w-full items-start justify-between">
-                    <Text>Volume</Text>
+                    <Text>Volume (Last 5 minutes)</Text>
                     <BadgeDelta
                         className=""
                         deltaType={
