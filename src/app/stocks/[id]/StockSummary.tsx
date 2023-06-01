@@ -1,3 +1,4 @@
+import { DataInterval } from "@/types/stocks"
 import { Card, Metric, BadgeDelta, Text } from "@tremor/react"
 
 type CurrPrevMetrics = {
@@ -5,19 +6,97 @@ type CurrPrevMetrics = {
     previous: number
 }
 
-interface StockSummaryProps {
+interface StockSummaryType {
     company: string
-    ticker: string
     sharePrice: CurrPrevMetrics
     volume: CurrPrevMetrics
 }
 
-function StockSummary(props: StockSummaryProps) {
+interface StockSummaryProps {
+    ticker: string
+    interval: DataInterval
+}
+
+async function getStockSummary(ticker: string) {
+    try {
+        const intradayRes = await fetch(
+            `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${ticker}&interval=1min&apikey=${process.env.ALPHA_VANTAGE_API_KEY}`,
+            {
+                next: { revalidate: 60 },
+            },
+        )
+
+        const quoteRes = await fetch(
+            `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${ticker}&apikey=${process.env.ALPHA_VANTAGE_API_KEY}`,
+        )
+
+        const overviewRes = await fetch(
+            `https://www.alphavantage.co/query?function=OVERVIEW&symbol=${ticker}&apikey=${process.env.ALPHA_VANTAGE_API_KEY}`,
+        )
+
+        if (!intradayRes.ok || !quoteRes.ok || !overviewRes.ok) {
+            throw new Error("API call failed")
+        }
+
+        const [intraday, quote, overview] = await Promise.all([
+            intradayRes.json(),
+            quoteRes.json(),
+            overviewRes.json(),
+        ])
+
+        const response: StockSummaryType = {
+            company: overview.Name,
+            sharePrice: {
+                current: parseFloat(
+                    intraday["Time Series (1min)"][
+                        Object.keys(intraday["Time Series (1min)"])[0]
+                    ]["1. open"],
+                ),
+                previous: parseFloat(
+                    quote["Global Quote"]["08. previous close"],
+                ),
+            },
+            volume: {
+                current: parseFloat(
+                    intraday["Time Series (1min)"][
+                        Object.keys(intraday["Time Series (1min)"])[0]
+                    ]["5. volume"],
+                ),
+                previous: parseFloat(
+                    intraday["Time Series (1min)"][
+                        Object.keys(intraday["Time Series (1min)"])[1]
+                    ]["5. volume"],
+                ),
+            },
+        }
+
+        console.log(response)
+
+        return response
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+async function StockSummary(props: StockSummaryProps) {
+    const stockSummary = await getStockSummary(props.ticker)
+
+    if (!stockSummary) {
+        throw new Error("Stock summary is undefined")
+    }
+
     return (
         <Card className="flex h-[20%] items-center gap-8">
-            <div className="space-y-1">
-                <Metric className="text-4xl">{props.company}</Metric>
-                <Text className="text-lg font-light ">{props.ticker}</Text>
+            <div className="w-auto flex-grow space-y-1">
+                <Metric className="text-4xl">
+                    {stockSummary.company ?? props.ticker}
+                </Metric>
+                <Text
+                    className={`text-lg font-light ${
+                        stockSummary.company ? "" : "hidden"
+                    }`}>
+                    {props.ticker}
+                </Text>
             </div>
             <Card className="px-5 py-4">
                 <div className="flex w-full items-start justify-between">
@@ -25,26 +104,26 @@ function StockSummary(props: StockSummaryProps) {
                     <BadgeDelta
                         className=""
                         deltaType={
-                            props.sharePrice.current ===
-                            props.sharePrice.previous
+                            stockSummary.sharePrice.current ===
+                            stockSummary.sharePrice.previous
                                 ? "unchanged"
-                                : props.sharePrice.current >
-                                  props.sharePrice.previous
+                                : stockSummary.sharePrice.current >
+                                  stockSummary.sharePrice.previous
                                 ? "increase"
                                 : "decrease" ?? "unchanged"
                         }>
                         {Math.abs(
-                            ((props.sharePrice.current -
-                                props.sharePrice.previous) /
-                                props.sharePrice.previous) *
+                            ((stockSummary.sharePrice.current -
+                                stockSummary.sharePrice.previous) /
+                                stockSummary.sharePrice.previous) *
                                 100,
                         ).toFixed(2)}
                         %
                     </BadgeDelta>
                 </div>
                 <div className="flex items-baseline justify-start space-x-3 truncate">
-                    <Metric>${props.sharePrice.current}</Metric>
-                    <Text>from ${props.sharePrice.previous}</Text>
+                    <Metric>${stockSummary.sharePrice.current}</Metric>
+                    <Text>from ${stockSummary.sharePrice.previous}</Text>
                 </div>
             </Card>
             <Card className="px-5 py-4">
@@ -53,18 +132,23 @@ function StockSummary(props: StockSummaryProps) {
                     <BadgeDelta
                         className=""
                         deltaType={
-                            props.volume.current === props.volume.previous
+                            stockSummary.volume.current ===
+                            stockSummary.volume.previous
                                 ? "unchanged"
-                                : props.volume.current > props.volume.previous
+                                : stockSummary.volume.current >
+                                  stockSummary.volume.previous
                                 ? "increase"
                                 : "decrease"
                         }>
-                        {Math.abs(props.volume.current - props.volume.previous).toFixed(2)}
+                        {Math.abs(
+                            stockSummary.volume.current -
+                                stockSummary.volume.previous,
+                        ).toFixed(2)}
                     </BadgeDelta>
                 </div>
                 <div className="flex items-baseline justify-start space-x-3 truncate">
-                    <Metric>{props.volume.current}</Metric>
-                    <Text>from {props.volume.previous}</Text>
+                    <Metric>{stockSummary.volume.current}</Metric>
+                    <Text>from {stockSummary.volume.previous}</Text>
                 </div>
             </Card>
         </Card>

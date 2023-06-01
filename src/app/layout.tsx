@@ -20,7 +20,7 @@ export default function RootLayout({
             <body>
                 <NextAuthProvider>
                     <Navbar />
-                    <div className="m-auto h-[85vh] max-w-[1536px]">
+                    <div className="container m-auto h-[85vh]">
                         {children}
                     </div>
                 </NextAuthProvider>

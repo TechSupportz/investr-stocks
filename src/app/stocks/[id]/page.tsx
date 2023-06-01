@@ -1,17 +1,37 @@
 import { BadgeDelta, Card, List, ListItem, Metric, Text } from "@tremor/react"
 import ListCard from "./ListCard"
 import StockSummary from "./StockSummary"
+import { DataInterval, DataType, TradeType } from "@/types/stocks"
 
-function StockPage({ params }: { params: { id: string } }) {
+interface searchParams {
+    interval?: DataInterval
+	data?: DataType
+	trade?: TradeType
+    [key: string]: string | string[] | undefined
+}
+
+function StockPage({
+    params,
+    searchParams,
+}: {
+    params: { id: string }
+    searchParams: searchParams
+}) {
     return (
         <div className="flex h-full gap-6">
             <div className="flex h-full w-[70%] flex-col gap-6">
                 {/* TODO - Replace with API data */}
                 <StockSummary
-                    company="AAPL"
                     ticker={params.id}
-                    sharePrice={{ current: 175.43, previous: 172.99 }}
-                    volume={{ current: 100, previous: 200 }}
+                    interval={
+                        searchParams?.interval
+                            ? ["1D", "5D", "1M", "6M", "1Y", "MAX"].includes(
+                                  searchParams?.interval.toUpperCase() as DataInterval,
+                              )
+                                ? (searchParams.interval.toUpperCase() as DataInterval)
+                                : "1D"
+                            : "1D"
+                    }
                 />
                 {/* TODO - extract into a StockChart component  */}
                 <Card className="h-[55%]">Graph</Card>
