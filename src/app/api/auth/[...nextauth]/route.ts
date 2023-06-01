@@ -3,7 +3,6 @@ import { nanoid } from "nanoid"
 import NextAuth, { AuthOptions, TokenSet } from "next-auth"
 import { JWT } from "next-auth/jwt"
 import { Provider } from "next-auth/providers"
-import { headers } from "next/dist/client/components/headers"
 
 const FidorProvider: Provider = {
     id: "fidor",
@@ -37,7 +36,7 @@ const FidorProvider: Provider = {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/x-www-form-urlencoded",
-                            Authorization: `Basic ${Buffer.from(
+                            authorization: `Basic ${Buffer.from(
                                 `${process.env.FIDOR_CLIENT_ID}:${process.env.FIDOR_CLIENT_SECRET}`,
                             ).toString("base64")}`,
                         },
@@ -102,41 +101,43 @@ const FidorProvider: Provider = {
     },
 }
 
-async function refreshAccessToken(token: JWT): Promise<JWT> {
+async function refreshAccessToken(token: JWT) {
     const params = {
         grant_type: "refresh_token",
         refresh_token: token.refreshToken,
     }
 
-    try {
-        const res = await fetch(
-            `https://apm.tp.sandbox.fidorfzco.com/oauth/token?${new URLSearchParams(
-                params,
-            ).toString()}`,
-            {
-                method: "POST",
-                cache: "no-store",
+    console.log(">>> token", token)
+
+    const res = await fetch(
+        `https://apm.tp.sandbox.fidorfzco.com/oauth/token?${new URLSearchParams(
+            params,
+        ).toString()}`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                authorization: `Basic ${Buffer.from(
+                    `${process.env.FIDOR_CLIENT_ID}:${process.env.FIDOR_CLIENT_SECRET}`,
+                ).toString("base64")}`,
             },
-        )
+            cache: "no-store",
+        },
+    )
+    const data = await res.json()
 
-        if (!res.ok) {
-            throw new Error("Failed to refresh tokens from Fidor")
-        }
+    if (!res.ok) {
+        throw data
+    }
 
-        const data = await res.json()
+    console.log(">>> refreshAccessToken", JSON.stringify(data, null, 2))
 
-        return {
-            ...token,
-            accessToken: data.access_token,
-            refreshToken: data.refresh_token,
-            expiresAt: DateTime.now()
-                .plus({ seconds: data.expires_in })
-                .toMillis(),
-            state: data.state,
-        }
-    } catch (error) {
-        console.error(error)
-        throw new Error("Failed to fetch tokens from Fidor")
+    return {
+        ...token,
+        accessToken: data.access_token,
+        refreshToken: data.refresh_token,
+        expiresAt: DateTime.now().plus({ seconds: 10 }).toMillis(),
+        state: token.state,
     }
 }
 
@@ -147,13 +148,13 @@ export const authOptions: AuthOptions = {
         strategy: "jwt",
     },
     callbacks: {
-        async jwt({ token, user, account, profile }) {
+        async jwt({token, user, account}) {
             // initial sign in
             if (account && user) {
                 token.accessToken = account.access_token
                 token.refreshToken = account.refresh_token
                 token.expiresAt = DateTime.now()
-                    .plus({ seconds: account.expires_at })
+                    .plus({ seconds: 20 })
                     .toMillis()
                 token.userId = user.id
                 token.userEmail = user.email
@@ -166,12 +167,15 @@ export const authOptions: AuthOptions = {
             return refreshAccessToken(token)
         },
         async session({ session, token }) {
-            session.accessToken = token.accessToken
-            session.refreshToken = token.refreshToken
-            session.expiresAt = token.expiresAt
-            session.user = {
-                id: token.userId,
-                email: token.userEmail,
+			console.log(">>> sessionTOken", token)
+            if (token) {
+                session.accessToken = token.accessToken
+                session.refreshToken = token.refreshToken
+                session.expiresAt = token.expiresAt
+                session.user = {
+                    id: token.userId,
+                    email: token.userEmail,
+                }
             }
 
             return session
