@@ -64,19 +64,19 @@ async function getStockSummary(ticker: string, mock: boolean) {
     }
 
     if (intraday.Note) {
-		intraday = null
+        intraday = null
         console.log("Alpha Vantage Intraday API rate limit exceeded")
     }
 
-	if (quote.Note) {
-		quote = null
-		console.log("Alpha Vantage Quote API rate limit exceeded")
-	}
+    if (quote.Note) {
+        quote = null
+        console.log("Alpha Vantage Quote API rate limit exceeded")
+    }
 
-	if (overview.Note) {
-		overview = null
-		console.log("Alpha Vantage Overview API rate limit exceeded")
-	}
+    if (overview.Note) {
+        overview = null
+        console.log("Alpha Vantage Overview API rate limit exceeded")
+    }
 
     // console.log(
     //     ">>> Response Data",
@@ -98,7 +98,7 @@ async function getStockSummary(ticker: string, mock: boolean) {
     // console.log(">>> Response Data", intraday, quote, overview)
 
     const response: StockSummaryType = {
-        company: overview.Name,
+        company: overview?.Name ?? "",
         sharePrice: {
             current: parseFloat(
                 intraday["Time Series (1min)"][

@@ -9,5 +9,10 @@ export interface CompanyEarnings {
 
 export interface AnnualEarnings {
     fiscalDateEnding: string
-	reportedEPS: number
+    reportedEPS: number
+}
+
+export interface StockChartData {
+    time: string
+    stockPrice: number
 }

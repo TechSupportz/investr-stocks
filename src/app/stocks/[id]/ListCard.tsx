@@ -26,7 +26,7 @@ async function getCompanyDetails({ ticker, type }: ListCardProps) {
     }
 
     if (overview.Note) {
-        throw new Error("Alpha Vantage API rate limit exceeded")
+        throw new Error("Alpha Vantage overview API rate limit exceeded")
     }
 
     const response = [
