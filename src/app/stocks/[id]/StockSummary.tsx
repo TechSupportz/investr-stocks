@@ -53,7 +53,7 @@ async function getStockSummary(ticker: string, mock: boolean) {
         throw new Error("Failed to fetch stock summary")
     }
 
-    const [intraday, quote, overview] = await Promise.all([
+    let [intraday, quote, overview] = await Promise.all([
         intradayRes.json(),
         quoteRes.json(),
         overviewRes.json(),
@@ -63,9 +63,20 @@ async function getStockSummary(ticker: string, mock: boolean) {
         throw new Error("Failed to fetch stock summary json")
     }
 
-    if (intraday.Note || quote.Note || overview.Note) {
-        throw new Error("Alpha Vantage API rate limit exceeded")
+    if (intraday.Note) {
+		intraday = null
+        console.log("Alpha Vantage Intraday API rate limit exceeded")
     }
+
+	if (quote.Note) {
+		quote = null
+		console.log("Alpha Vantage Quote API rate limit exceeded")
+	}
+
+	if (overview.Note) {
+		overview = null
+		console.log("Alpha Vantage Overview API rate limit exceeded")
+	}
 
     // console.log(
     //     ">>> Response Data",
@@ -118,8 +129,8 @@ async function getStockSummary(ticker: string, mock: boolean) {
 }
 
 async function StockSummary(props: StockSummaryProps) {
-	// NOTE - change this to false to use the API
-    const stockSummary = await getStockSummary(props.ticker, true)
+    // NOTE - change this to false to use the API
+    const stockSummary = await getStockSummary(props.ticker, false)
 
     return (
         <Card className="flex h-[20%] items-center gap-8">
