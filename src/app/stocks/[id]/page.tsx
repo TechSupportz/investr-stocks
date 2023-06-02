@@ -57,47 +57,10 @@ function StockPage({
                     }
                 />
                 <div className="flex h-[25%] gap-4">
-                    {/* TODO - Probably can map this with API response */}
-                    <ListCard
-                        items={[
-                            {
-                                title: "Exchange",
-                                value: "NASDAQ",
-                            },
-                            {
-                                title: "Sector",
-                                value: "Technology",
-                            },
-                            {
-                                title: "P/E Ratio",
-                                value: "29.78",
-                            },
-                            {
-                                title: "Dividend Yield",
-                                value: "0.60%",
-                            },
-                        ]}
-                    />
-                    <ListCard
-                        items={[
-                            {
-                                title: "Open",
-                                value: "$173.32",
-                            },
-                            {
-                                title: "High",
-                                value: "$175.77",
-                            },
-                            {
-                                title: "Low",
-                                value: "$173.11",
-                            },
-                            {
-                                title: "Previous Close",
-                                value: "$172.99",
-                            },
-                        ]}
-                    />
+                    {/* @ts-expect-error Async Server Component */}
+                    <ListCard ticker={params.id} type="Company" />
+                    {/* @ts-expect-error Async Server Component */}
+                    <ListCard ticker={params.id} type="Stock" />
                 </div>
             </div>
             <div className="flex h-full w-[30%] flex-col gap-4">
