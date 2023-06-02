@@ -17,7 +17,22 @@ interface StockSummaryProps {
     interval: DataInterval
 }
 
-async function getStockSummary(ticker: string) {
+async function getStockSummary(ticker: string, mock: boolean) {
+    console.log("mock", mock)
+    if (mock) {
+        return {
+            company: "Apple Inc.",
+            sharePrice: {
+                current: 148.97,
+                previous: 148.56,
+            },
+            volume: {
+                current: 100,
+                previous: 320,
+            },
+        }
+    }
+
     console.log("fetching stock summary")
     const intradayRes = await fetch(
         `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${ticker}&interval=1min&apikey=${process.env.ALPHA_VANTAGE_API_KEY}`,
@@ -48,9 +63,9 @@ async function getStockSummary(ticker: string) {
         throw new Error("Failed to fetch stock summary json")
     }
 
-	if (intraday.Note || quote.Note || overview.Note) {
-		throw new Error("Alpha Vantage API rate limit exceeded")
-	}
+    if (intraday.Note || quote.Note || overview.Note) {
+        throw new Error("Alpha Vantage API rate limit exceeded")
+    }
 
     // console.log(
     //     ">>> Response Data",
@@ -69,7 +84,7 @@ async function getStockSummary(ticker: string) {
     //     ]["5. volume"],
     // )
 
-	// console.log(">>> Response Data", intraday, quote, overview)
+    // console.log(">>> Response Data", intraday, quote, overview)
 
     const response: StockSummaryType = {
         company: overview.Name,
@@ -103,8 +118,8 @@ async function getStockSummary(ticker: string) {
 }
 
 async function StockSummary(props: StockSummaryProps) {
-    const stockSummary = await getStockSummary(props.ticker)
-    console.log(stockSummary)
+	// NOTE - change this to false to use the API
+    const stockSummary = await getStockSummary(props.ticker, true)
 
     return (
         <Card className="flex h-[20%] items-center gap-8">
@@ -143,8 +158,12 @@ async function StockSummary(props: StockSummaryProps) {
                     </BadgeDelta>
                 </div>
                 <div className="flex items-baseline justify-start space-x-3 truncate">
-                    <Metric>${stockSummary.sharePrice.current.toFixed(2)}</Metric>
-                    <Text>from ${stockSummary.sharePrice.previous.toFixed(2)}</Text>
+                    <Metric>
+                        ${stockSummary.sharePrice.current.toFixed(2)}
+                    </Metric>
+                    <Text>
+                        from ${stockSummary.sharePrice.previous.toFixed(2)}
+                    </Text>
                 </div>
             </Card>
             <Card className="px-5 py-4">
