@@ -9,9 +9,11 @@ import {
     Metric,
     Button,
 } from "@tremor/react"
+import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
 
 interface PurchaseCardProps {
+    ticker: string
     buyPrice: number
     sellPrice: number
     isUp: boolean
@@ -22,6 +24,8 @@ function PurchaseCard(props: PurchaseCardProps) {
     const [shares, setShares] = useState(0)
     const [commission, setCommission] = useState(0)
     const [total, setTotal] = useState(0)
+
+    const session = useSession()
 
     useEffect(() => {
         if (props.buyPrice) {
@@ -36,11 +40,30 @@ function PurchaseCard(props: PurchaseCardProps) {
         }
 
         if (tradeType === "buy") {
-            setTotal(shares * (props.buyPrice - commission))
+            setTotal(Math.ceil(shares * (props.buyPrice - commission)))
         } else {
-            setTotal(shares * props.sellPrice)
+            setTotal(Math.ceil(shares * props.sellPrice))
         }
     }, [shares])
+
+    const buyStocks = () => {
+        fetch(`${window.location.origin}/api/stocks/buy`, {
+            method: "POST",
+            body: JSON.stringify({
+                token: session.data?.accessToken,
+                accountId: session.data?.user.id,
+                amount: total,
+                ticker: props.ticker,
+                sharePrice: props.buyPrice,
+                shareCount: shares,
+            }),
+        })
+            .then(res => res.json())
+            .then(data => console.log(data))
+            .catch(err => console.log(err))
+    }
+
+    const sellStocks = () => {}
 
     return (
         <div className="w-full items-center justify-center">
@@ -104,7 +127,9 @@ function PurchaseCard(props: PurchaseCardProps) {
                     </Metric>
                 </div>
             </div>
-            <Button className="w-full">
+            <Button
+                className="w-full"
+                onClick={tradeType ? buyStocks : sellStocks}>
                 {tradeType === "buy" ? "Buy it!" : "Sell it!"}
             </Button>
         </div>

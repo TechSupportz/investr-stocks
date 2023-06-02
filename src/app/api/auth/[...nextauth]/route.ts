@@ -167,7 +167,7 @@ export const authOptions: AuthOptions = {
             return refreshAccessToken(token)
         },
         async session({ session, token }) {
-            console.log(">>> sessionTOken", token)
+            console.log(">>> sessionToken", token)
             if (token) {
                 session.accessToken = token.accessToken
                 session.refreshToken = token.refreshToken

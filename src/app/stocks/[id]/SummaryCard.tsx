@@ -53,6 +53,7 @@ async function SummaryCard(props: SummaryCardProps) {
             <div>
                 <Title className="my-3 text-2xl font-semibold">Trade</Title>
                 <PurchaseCard
+                    ticker={props.ticker}
                     buyPrice={tradeDetails.buy}
                     sellPrice={tradeDetails.sell}
                     isUp={tradeDetails.isUp}
