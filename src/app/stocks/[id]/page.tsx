@@ -21,7 +21,6 @@ function StockPage({
     return (
         <div className="flex h-full gap-4">
             <div className="flex h-full w-[70%] flex-col gap-4">
-                {/* @ts-expect-error Async Server Component */}
                 <StockSummary
                     ticker={params.id}
                     interval={
@@ -34,7 +33,6 @@ function StockPage({
                             : "1D"
                     }
                 />
-                {/* @ts-expect-error Async Server Component */}
                 <StockChart
                     ticker={params.id}
                     data={
@@ -57,9 +55,7 @@ function StockPage({
                     }
                 />
                 <div className="flex h-[25%] gap-4">
-                    {/* @ts-expect-error Async Server Component */}
                     <ListCard ticker={params.id} type="Company" />
-                    {/* @ts-expect-error Async Server Component */}
                     <ListCard ticker={params.id} type="Stock" />
                 </div>
             </div>
