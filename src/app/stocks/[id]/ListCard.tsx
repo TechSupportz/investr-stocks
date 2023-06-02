@@ -93,25 +93,6 @@ async function getStockDetails({ ticker, type }: ListCardProps) {
 }
 
 async function ListCard(props: ListCardProps) {
-    const items = [
-        {
-            title: "Open",
-            value: "$173.32",
-        },
-        {
-            title: "High",
-            value: "$175.77",
-        },
-        {
-            title: "Low",
-            value: "$173.11",
-        },
-        {
-            title: "Previous Close",
-            value: "$172.99",
-        },
-    ]
-
     const cardDetails =
         props.type === "Company"
             ? await getCompanyDetails(props)

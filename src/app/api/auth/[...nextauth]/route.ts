@@ -148,7 +148,7 @@ export const authOptions: AuthOptions = {
         strategy: "jwt",
     },
     callbacks: {
-        async jwt({token, user, account}) {
+        async jwt({ token, user, account }) {
             // initial sign in
             if (account && user) {
                 token.accessToken = account.access_token
@@ -167,7 +167,7 @@ export const authOptions: AuthOptions = {
             return refreshAccessToken(token)
         },
         async session({ session, token }) {
-			console.log(">>> sessionTOken", token)
+            console.log(">>> sessionTOken", token)
             if (token) {
                 session.accessToken = token.accessToken
                 session.refreshToken = token.refreshToken

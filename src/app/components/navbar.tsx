@@ -7,7 +7,7 @@ import {
     UserCircleIcon,
 } from "@heroicons/react/outline"
 import { Button, TextInput, Title } from "@tremor/react"
-import { useSession } from "next-auth/react"
+import { signIn, signOut, useSession } from "next-auth/react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -15,6 +15,21 @@ import { useRouter } from "next/navigation"
 function Navbar() {
     const { data: session } = useSession()
     const router = useRouter()
+
+    const appSignOut = async () => {
+        if (!session) {
+            return
+        }
+
+        fetch(`${window.location.origin}/api/accounts/logout`, {
+            method: "POST",
+            body: JSON.stringify({
+                token: session.accessToken,
+            }),
+        })
+
+        await signOut()
+    }
 
     return (
         <nav className="mb-5 flex bg-white px-8 py-4 shadow-sm">
@@ -47,15 +62,13 @@ function Navbar() {
                         {session ? (
                             <Button
                                 icon={LogoutIcon}
-                                onClick={() =>
-                                    router.push("/api/auth/signout")
-                                }>
+                                onClick={() => appSignOut()}>
                                 Logout
                             </Button>
                         ) : (
                             <Button
                                 icon={LoginIcon}
-                                onClick={() => router.push("/api/auth/signin")}>
+                                onClick={() => signIn("fidor")}>
                                 Login
                             </Button>
                         )}
