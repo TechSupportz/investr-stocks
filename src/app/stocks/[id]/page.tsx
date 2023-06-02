@@ -3,6 +3,7 @@ import ListCard from "./ListCard"
 import StockSummary from "./StockSummary"
 import { DataInterval, DataType, TradeType } from "@/types/stocks"
 import StockChart from "./StockChart"
+import SummaryCard from "./SummaryCard"
 
 interface searchParams {
     interval?: DataInterval
@@ -60,8 +61,8 @@ function StockPage({
                 </div>
             </div>
             <div className="flex h-full w-[30%] flex-col gap-4">
-                <Card className="h-3/5" />
-                <Card className="h-2/5" />
+                <SummaryCard ticker={params.id} />
+                <Card className="h-2/6" />
             </div>
         </div>
     )

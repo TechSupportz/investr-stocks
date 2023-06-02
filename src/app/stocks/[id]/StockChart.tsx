@@ -31,7 +31,11 @@ async function getCompanyEarnings(ticker: string) {
     }
 
     if ((earnings as any).Note) {
-        throw new Error("Alpha Vantage earnings API rate limit exceeded")
+        console.log("Alpha Vantage earnings API rate limit exceeded")
+        return {
+            symbol: ticker,
+            annualEarnings: [],
+        }
     }
 
     earnings.annualEarnings = earnings.annualEarnings.map(earnings => {
@@ -43,9 +47,7 @@ async function getCompanyEarnings(ticker: string) {
         }
     })
 
-    return {
-        ...earnings,
-    }
+    return earnings
 }
 
 async function getStockData(ticker: string, interval: DataInterval) {
@@ -64,7 +66,8 @@ async function getStockData(ticker: string, interval: DataInterval) {
     }
 
     if ((stockData as any).Note) {
-        throw new Error("Alpha Vantage stock data API rate limit exceeded")
+        console.log("Alpha Vantage stock data API rate limit exceeded")
+        return []
     }
 
     const response: StockChartData[] = Object.entries(

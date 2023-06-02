@@ -130,7 +130,7 @@ async function getStockSummary(ticker: string, mock: boolean) {
 
 async function StockSummary(props: StockSummaryProps) {
     // NOTE - change this to false to use the API
-    const stockSummary = await getStockSummary(props.ticker, false)
+    const stockSummary = await getStockSummary(props.ticker, true)
 
     return (
         <Card className="flex h-[20%] items-center gap-8">
