@@ -102,6 +102,7 @@ function PurchaseCard(props: PurchaseCardProps) {
             method: "POST",
             body: JSON.stringify({
                 accountId: props.session.user.id,
+                email: props.session.user.email,
                 amount: total,
                 ticker: props.ticker,
                 sharePrice: props.buyPrice,

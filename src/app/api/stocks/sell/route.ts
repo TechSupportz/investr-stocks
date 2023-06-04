@@ -4,13 +4,13 @@ import { nanoid } from "nanoid"
 import { NextResponse } from "next/server"
 
 export async function POST(req: Request) {
-    const { accountId, amount, ticker, sharePrice, shareCount } =
+    const { email, accountId, amount, ticker, sharePrice, shareCount } =
         await req.json()
 
     if (!accountId || !amount || !ticker || !sharePrice || !shareCount) {
         return NextResponse.json(
             {
-                error: "Missing required fields. Please send accountId, amount, ticker, sharePrice and shareCount.",
+                error: "Missing required fields. Please send email, accountId, amount, ticker, sharePrice and shareCount.",
             },
             {
                 status: 400,
@@ -27,7 +27,7 @@ export async function POST(req: Request) {
         {
             [id]: {
                 amount,
-                receiver: accountId,
+                receiver: email,
                 shareCount,
                 sharePrice,
                 ticker,
