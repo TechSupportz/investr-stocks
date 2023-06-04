@@ -1,3 +1,5 @@
+import { db } from "@/firebase"
+import { doc, setDoc } from "firebase/firestore"
 import { DateTime } from "luxon"
 import { nanoid } from "nanoid"
 import NextAuth, { AuthOptions, TokenSet } from "next-auth"
@@ -84,6 +86,12 @@ const FidorProvider: Provider = {
 
                 const data = await res.json()
                 // console.log(">>> user", JSON.stringify(data, null, 2))
+
+                if (res.ok) {
+                    const docRef = doc(db, "users", data.id)
+                    await setDoc(docRef, {}, { merge: true })
+                }
+
                 return data
             } catch (error) {
                 console.error(error)

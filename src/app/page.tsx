@@ -1,10 +1,13 @@
 import { getServerSession } from "next-auth"
 import { authOptions } from "./api/auth/[...nextauth]/route"
 import { Text } from "@tremor/react"
+import { db } from "@/firebase"
+import { collection, doc, getDoc, getDocs } from "firebase/firestore"
+import { SellRequests } from "@/types/firestore"
 
 async function getAccountDetails(access_token: string) {
     const res = await fetch(
-        `https://api.tp.sandbox.fidorfzco.com/transactions?per_page=100`,
+        `https://api.tp.sandbox.fidorfzco.com/transactions`,
         {
             method: "GET",
             headers: {
@@ -32,11 +35,21 @@ export default async function Home() {
 
     const account = await getAccountDetails(session.accessToken)
 
+    const docRef = doc(db, "users", session.user.id)
+
+    const docSnap = (await getDoc(docRef)).data()
     return (
         <div>
             <Text>{JSON.stringify(session, null, 2)}</Text>
             <br />
-            <Text>{account && JSON.stringify(account.data, null, 2)}</Text>
+            {Object.keys(docSnap!).map(key => {
+                return (
+                    <div>
+                        <Text>{key}</Text>
+                        <Text>{JSON.stringify(docSnap![key])}</Text>
+                    </div>
+                )
+            })}
         </div>
     )
 }

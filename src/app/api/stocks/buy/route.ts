@@ -27,7 +27,7 @@ export async function POST(req: Request) {
         account_id: accountId,
         receiver: "studenta23@email.com",
         amount: amount,
-        subject: `${shareCount} shares of ${ticker} at ${sharePrice}`,
+        subject: `INVESTR-STOCKS | ${shareCount} shares of ${ticker} at ${sharePrice}`,
     }
 
     const res = await fetch(
