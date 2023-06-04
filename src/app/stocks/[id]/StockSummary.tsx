@@ -64,16 +64,19 @@ async function getStockSummary(ticker: string, mock: boolean) {
     }
 
     if (intraday.Note) {
+        console.log(">>> intraday", intraday)
         intraday = null
         console.log("Alpha Vantage Intraday API rate limit exceeded")
     }
 
     if (quote.Note) {
+        console.log(">>> quote", quote)
         quote = null
         console.log("Alpha Vantage Quote API rate limit exceeded")
     }
 
     if (overview.Note) {
+        console.log(">>> overview", overview)
         overview = null
         console.log("Alpha Vantage Overview API rate limit exceeded")
     }

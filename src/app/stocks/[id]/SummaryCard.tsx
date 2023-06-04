@@ -110,6 +110,7 @@ async function SummaryCard(props: SummaryCardProps) {
                     buyPrice={tradeDetails.buy}
                     sellPrice={tradeDetails.sell}
                     isUp={tradeDetails.isUp}
+                    session={session}
                 />
             </div>
         </Card>

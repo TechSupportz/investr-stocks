@@ -55,10 +55,11 @@ function StockPage({
                             : "1D"
                     }
                 />
-                <div className="flex h-[25%] gap-4">
+                {/* FIXME - uncomment this after new alphavantage api key */}
+                {/* <div className="flex h-[25%] gap-4">
                     <ListCard ticker={params.id} type="Company" />
                     <ListCard ticker={params.id} type="Stock" />
-                </div>
+                </div> */}
             </div>
             <div className="flex h-full w-[30%] flex-col gap-4">
                 <SummaryCard ticker={params.id} />

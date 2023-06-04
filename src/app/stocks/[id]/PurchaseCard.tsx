@@ -1,5 +1,6 @@
 "use client"
 
+import { db } from "@/firebase"
 import { CashIcon, PresentationChartLineIcon } from "@heroicons/react/outline"
 import {
     Toggle,
@@ -9,6 +10,8 @@ import {
     Metric,
     Button,
 } from "@tremor/react"
+import { collection, doc, onSnapshot } from "firebase/firestore"
+import { Session } from "next-auth"
 import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
 
@@ -17,6 +20,7 @@ interface PurchaseCardProps {
     buyPrice: number
     sellPrice: number
     isUp: boolean
+    session: Session
 }
 
 function PurchaseCard(props: PurchaseCardProps) {
@@ -26,7 +30,27 @@ function PurchaseCard(props: PurchaseCardProps) {
     const [total, setTotal] = useState(0)
     const [isLoading, setIsLoading] = useState(false)
 
-    const session = useSession()
+    const [sharedOwned, setSharesOwned] = useState(0)
+
+    useEffect(() => {
+        const unsubscribe = onSnapshot(
+            doc(db, "users", props.session.user.id),
+            doc => {
+                const data = doc.data()
+                if (!data) {
+                    return
+                }
+
+                if (!data[props.ticker]) {
+                    return
+                }
+
+                setSharesOwned(data[props.ticker].shareCount)
+            },
+        )
+
+        return () => unsubscribe()
+    }, [])
 
     useEffect(() => {
         if (props.buyPrice) {
@@ -37,6 +61,11 @@ function PurchaseCard(props: PurchaseCardProps) {
     useEffect(() => {
         if (shares === 0) {
             setTotal(0)
+            return
+        }
+
+        if (tradeType === "sell" && shares > sharedOwned) {
+            setShares(sharedOwned)
             return
         }
 
@@ -52,8 +81,8 @@ function PurchaseCard(props: PurchaseCardProps) {
         fetch(`${window.location.origin}/api/stocks/buy`, {
             method: "POST",
             body: JSON.stringify({
-                token: session.data?.accessToken,
-                accountId: session.data?.user.id,
+                token: props.session.accessToken,
+                accountId: props.session.user.id,
                 amount: total,
                 ticker: props.ticker,
                 sharePrice: props.buyPrice,
@@ -66,7 +95,24 @@ function PurchaseCard(props: PurchaseCardProps) {
             .finally(() => setIsLoading(false))
     }
 
-    const sellStocks = () => {}
+    const sellStocks = () => {
+        console.log("hallo pls sell")
+        setIsLoading(true)
+        fetch(`${window.location.origin}/api/stocks/sell`, {
+            method: "POST",
+            body: JSON.stringify({
+                accountId: props.session.user.id,
+                amount: total,
+                ticker: props.ticker,
+                sharePrice: props.buyPrice,
+                shareCount: shares,
+            }),
+        })
+            .then(res => res.json())
+            .then(data => console.log(data))
+            .catch(err => console.log(err))
+            .finally(() => setIsLoading(false))
+    }
 
     return (
         <div className="flex h-full w-full flex-col items-center justify-center">
@@ -105,6 +151,7 @@ function PurchaseCard(props: PurchaseCardProps) {
                         placeholder="0"
                         type={"number" as unknown as undefined}
                         min={0}
+                        max={tradeType === "sell" ? sharedOwned : undefined}
                         value={shares.toString()}
                         onChange={e =>
                             e.target.value.length > 0
@@ -133,7 +180,7 @@ function PurchaseCard(props: PurchaseCardProps) {
             <Button
                 className="w-full self-end"
                 loading={isLoading}
-                onClick={tradeType ? buyStocks : sellStocks}>
+                onClick={tradeType === "buy" ? buyStocks : sellStocks}>
                 {tradeType === "buy" ? "Buy it!" : "Sell it!"}
             </Button>
         </div>
