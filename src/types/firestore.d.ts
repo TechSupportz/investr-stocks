@@ -7,3 +7,10 @@ export interface SellRequests {
         ticker: string
     }
 }
+
+export interface UserStocks {
+    [ticker: string]: {
+        shareCount: number
+        totalInvestment: number
+    }
+}

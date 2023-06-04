@@ -24,6 +24,7 @@ function PurchaseCard(props: PurchaseCardProps) {
     const [shares, setShares] = useState(0)
     const [commission, setCommission] = useState(0)
     const [total, setTotal] = useState(0)
+    const [isLoading, setIsLoading] = useState(false)
 
     const session = useSession()
 
@@ -47,6 +48,7 @@ function PurchaseCard(props: PurchaseCardProps) {
     }, [shares])
 
     const buyStocks = () => {
+        setIsLoading(true)
         fetch(`${window.location.origin}/api/stocks/buy`, {
             method: "POST",
             body: JSON.stringify({
@@ -61,6 +63,7 @@ function PurchaseCard(props: PurchaseCardProps) {
             .then(res => res.json())
             .then(data => console.log(data))
             .catch(err => console.log(err))
+            .finally(() => setIsLoading(false))
     }
 
     const sellStocks = () => {}
@@ -129,6 +132,7 @@ function PurchaseCard(props: PurchaseCardProps) {
             </div>
             <Button
                 className="w-full"
+                loading={isLoading}
                 onClick={tradeType ? buyStocks : sellStocks}>
                 {tradeType === "buy" ? "Buy it!" : "Sell it!"}
             </Button>

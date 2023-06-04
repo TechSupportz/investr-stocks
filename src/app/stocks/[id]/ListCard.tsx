@@ -44,7 +44,10 @@ async function getCompanyDetails({ ticker, type }: ListCardProps) {
         },
         {
             title: "Dividend Yield",
-            value: overview.DividendYield,
+            value:
+                overview.DividendYield == 0
+                    ? "N/A"
+                    : `${overview.DividendYield}%`,
         },
     ]
 

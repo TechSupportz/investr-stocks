@@ -1,6 +1,9 @@
 // Fidor Main account number: 4799894390
 
+import { db } from "@/firebase"
+import { doc, increment, setDoc } from "firebase/firestore"
 import { nanoid } from "nanoid"
+import { NextResponse } from "next/server"
 
 export async function POST(req: Request) {
     const { token, accountId, amount, ticker, sharePrice, shareCount } =
@@ -27,7 +30,7 @@ export async function POST(req: Request) {
         account_id: accountId,
         receiver: "studenta23@email.com",
         amount: amount,
-        subject: `INVESTR-STOCKS | ${shareCount} shares of ${ticker} at ${sharePrice}`,
+        subject: `INVESTR-STOCKS - ${shareCount} shares of ${ticker} at ${sharePrice}`,
     }
 
     const res = await fetch(
@@ -47,21 +50,37 @@ export async function POST(req: Request) {
 
     if (!res.ok) {
         console.log(data)
-        return {
-            status: res.status,
-            body: {
+        return NextResponse.json(
+            {
                 error: `Could not buy stock`,
                 details: data,
             },
-        }
+            {
+                status: res.status,
+            },
+        )
     }
 
+    const docRef = doc(db, "users", accountId)
+    await setDoc(
+        docRef,
+        {
+            [ticker]: {
+                shareCount: increment(shareCount),
+                totalInvestment: increment(sharePrice * shareCount),
+            },
+        },
+        { merge: true },
+    )
+
     console.log(data)
-    return {
-        status: 200,
-        body: {
+    return NextResponse.json(
+        {
             message: "Stock bought successfully",
             data: data,
         },
-    }
+        {
+            status: res.status,
+        },
+    )
 }
