@@ -69,7 +69,7 @@ function PurchaseCard(props: PurchaseCardProps) {
     const sellStocks = () => {}
 
     return (
-        <div className="w-full items-center justify-center">
+        <div className="flex h-full w-full flex-col items-center justify-center">
             <Toggle
                 className="mb-4 w-full"
                 value={tradeType}
@@ -87,8 +87,8 @@ function PurchaseCard(props: PurchaseCardProps) {
                     text="Sell"
                 />
             </Toggle>
-            <div className="mb-4 space-y-3">
-                <div className="mx-3 flex items-center justify-between">
+            <div className="mb-4 w-[90%] space-y-3">
+                <div className="flex items-center justify-between">
                     <Text className="text-base font-medium">Market Price</Text>
                     <Text
                         className={`max-w-[30%] ${
@@ -98,7 +98,7 @@ function PurchaseCard(props: PurchaseCardProps) {
                         {tradeType === "buy" ? props.buyPrice : props.sellPrice}
                     </Text>
                 </div>
-                <div className="mx-3 flex items-center justify-between">
+                <div className="flex items-center justify-between">
                     <Text className="text-base font-medium">No. of Shares</Text>
                     <TextInput
                         className="max-w-[30%]"
@@ -114,7 +114,7 @@ function PurchaseCard(props: PurchaseCardProps) {
                     />
                 </div>
                 {tradeType === "buy" ? (
-                    <div className="mx-3 flex items-center justify-between">
+                    <div className="flex items-center justify-between">
                         <Text className="text-base font-medium">
                             Commission (per share)
                         </Text>
@@ -123,7 +123,7 @@ function PurchaseCard(props: PurchaseCardProps) {
                         </Text>
                     </div>
                 ) : null}
-                <div className="mx-3 flex items-center justify-between">
+                <div className="flex items-center justify-between">
                     <Metric className="text-xl font-bold">Total</Metric>
                     <Metric className="text-xl font-bold">
                         ${total.toFixed(2)}
@@ -131,7 +131,7 @@ function PurchaseCard(props: PurchaseCardProps) {
                 </div>
             </div>
             <Button
-                className="w-full"
+                className="w-full self-end"
                 loading={isLoading}
                 onClick={tradeType ? buyStocks : sellStocks}>
                 {tradeType === "buy" ? "Buy it!" : "Sell it!"}

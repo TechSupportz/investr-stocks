@@ -1,5 +1,10 @@
-import { BadgeDelta, Card, Title, Text, Metric } from "@tremor/react"
+import { db } from "@/firebase"
+import { UserStocks } from "@/types/firestore"
+import { BadgeDelta, Card, Metric, Text, Title } from "@tremor/react"
+import { doc, getDoc } from "firebase/firestore"
 import PurchaseCard from "./PurchaseCard"
+import { authOptions } from "@/app/api/auth/[...nextauth]/route"
+import { getServerSession } from "next-auth"
 
 async function getStockDetails(ticker: string) {
     const quoteRes = await fetch(
@@ -29,25 +34,73 @@ async function getStockDetails(ticker: string) {
     return response
 }
 
+async function getUserInvestments(
+    ticker: string,
+    buyPrice: number,
+    accountId: string,
+) {
+    const docRef = doc(db, "users", accountId)
+
+    const docSnap = await getDoc(docRef)
+
+    if (!docSnap.exists()) {
+        return undefined
+    }
+
+    const data = docSnap.data() as UserStocks
+
+    if (!data[ticker]) {
+        return undefined
+    }
+
+    const returns =
+        (data[ticker].shareCount * buyPrice - data[ticker].totalInvestment) /
+        data[ticker].totalInvestment
+
+    return {
+        shareCount: data[ticker].shareCount,
+        totalInvestment: data[ticker].totalInvestment,
+        returns: returns,
+    }
+}
+
 interface SummaryCardProps {
     ticker: string
 }
 
 async function SummaryCard(props: SummaryCardProps) {
+    const session = await getServerSession(authOptions)
+
+    if (!session) {
+        return <Text>Not logged in</Text>
+    }
+
     const tradeDetails = await getStockDetails(props.ticker)
+
+    const userInvestments = await getUserInvestments(
+        props.ticker,
+        tradeDetails.buy,
+        session.user.id,
+    )
 
     return (
         <Card className="h-4/6 py-4">
             <div>
                 <Title className="mb-2 text-2xl font-semibold">Summary</Title>
                 <Card className="px-5 py-4">
-                    <div className="flex w-full items-start justify-between">
-                        <Text>Your investments</Text>
-                        <BadgeDelta className="" deltaType={"increase"}>
-                            {5.97}%
-                        </BadgeDelta>
-                    </div>
-                    <Metric>${`150,736`}</Metric>
+                    {userInvestments ? (
+                        <>
+                            <div className="flex w-full items-start justify-between">
+                                <Text>Your investments</Text>
+                                <BadgeDelta className="" deltaType={"increase"}>
+                                    {userInvestments.returns.toFixed(2)}%
+                                </BadgeDelta>
+                            </div>
+                            <Metric>${userInvestments.totalInvestment}</Metric>
+                        </>
+                    ) : (
+                        <Text>You have no investments in this stock</Text>
+                    )}
                 </Card>
             </div>
             <div>
