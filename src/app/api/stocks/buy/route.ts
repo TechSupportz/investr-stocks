@@ -29,7 +29,7 @@ export async function POST(req: Request) {
         external_uid: nanoid(),
         account_id: accountId,
         receiver: "studenta23@email.com",
-        amount: amount,
+        amount: amount * 100,
         subject: `INVESTR-STOCKS - ${shareCount} shares of ${ticker} at ${sharePrice}`,
     }
 
