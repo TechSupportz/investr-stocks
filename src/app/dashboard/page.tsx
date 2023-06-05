@@ -1,8 +1,10 @@
 import { db } from "@/firebase"
 import { SellRequests } from "@/types/firestore"
 import {
+    BarChart,
     Button,
     Card,
+    DonutChart,
     Metric,
     Table,
     TableBody,
@@ -14,12 +16,15 @@ import {
     Title,
 } from "@tremor/react"
 import { doc, getDoc } from "firebase/firestore"
-import { getServerSession } from "next-auth"
+import { Session, getServerSession } from "next-auth"
 import { redirect } from "next/navigation"
 import { authOptions } from "../api/auth/[...nextauth]/route"
 import AccountCardIcon from "./AccountCardIcon"
 import SellReqCard from "./SellReqCard"
-import { FidorTransactionsResponse } from "@/types/fidorAPI"
+import {
+    FidorAccountResponse,
+    FidorTransactionsResponse,
+} from "@/types/fidorAPI"
 import { DateTime } from "luxon"
 import TransactionCard, { TransactionCardProps } from "./TransactionCard"
 
@@ -52,7 +57,7 @@ async function getAccountDetails(access_token: string) {
         throw new Error("Failed to fetch account details")
     }
 
-    const data = await res.json()
+    const data = (await res.json()) as FidorAccountResponse
 
     return data
 }
@@ -67,13 +72,10 @@ async function getTransactions(access_token: string) {
                 accept: "application/vnd.fidor.de; version=1,text/json",
             },
             cache: "no-store",
-			next: {
-				tags : [
-					"transactions"
-				]
-			}
+            next: {
+                tags: ["transactions"],
+            },
         },
-		
     )
 
     if (!res.ok) {
@@ -86,17 +88,83 @@ async function getTransactions(access_token: string) {
     return data
 }
 
-async function DashboardPage() {
-    const session = await getServerSession(authOptions)
+async function getInvestmentPortfolio(accountId: string) {
+    const decRef = doc(db, "users", accountId)
 
-    if (!session) {
-        redirect("/")
+    const docSnap = await getDoc(decRef)
+
+    if (!docSnap.exists()) {
+        throw new Error("Failed to fetch investments")
     }
 
-    const accountDetails = await getAccountDetails(session.accessToken)
-    const transactions = await getTransactions(session.accessToken)
+    const data = docSnap.data()
 
-    console.log(">>> Account details", accountDetails)
+    const parsedData = Object.keys(data)
+        .map(key => {
+            return {
+                ...data[key],
+                ticker: key,
+            }
+        })
+        .sort((a, b) => b.totalInvestment - a.totalInvestment)
+
+    console.log(parsedData)
+
+    return parsedData
+}
+
+async function DashboardPage() {
+    // const session = await getServerSession(authOptions)
+    //FIXME - this is a hack to get around the fact that fidor dies after 12am
+    const session: Session = {
+        user: {
+            id: "37378142",
+            email: "customerB1@example.com",
+        },
+        accessToken: "test",
+        refreshToken: "test",
+        expires: "test",
+        expiresAt: 1234,
+    }
+
+    // if (!session) {
+    //     redirect("/")
+    // }
+
+    //FIXME -  this is a hack to get around the fact that fidor dies after 12am
+    // const accountDetails = await getAccountDetails(session.accessToken)
+    // const transactions = await getTransactions(session.accessToken)
+
+    // console.log(">>> Account details", accountDetails)
+    const accountDetails: FidorAccountResponse = {
+        collection: {
+            current_page: 1,
+            per_page: 100,
+            total_entries: 0,
+            total_pages: 0,
+        },
+        data: [
+            {
+                id: "1234",
+                bic: "1234",
+                created_at: "2021-10-10T10:10:10Z",
+                updated_at: "2021-10-10T10:10:10Z",
+                nick: "",
+                balance: 100000,
+            },
+        ],
+    }
+    const transactions: FidorTransactionsResponse = {
+        collection: {
+            current_page: 1,
+            per_page: 100,
+            total_entries: 0,
+            total_pages: 0,
+        },
+        data: [],
+    }
+
+    // console.log(">>> Account details", accountDetails)
 
     if (
         session.user.id === "95933444" &&
@@ -287,6 +355,13 @@ async function DashboardPage() {
         })
         .filter(item => !!item)
 
+    const investmentPortfolio = await getInvestmentPortfolio(session.user.id)
+
+    const totalInvestment = investmentPortfolio.reduce(
+        (acc, curr) => acc + curr.totalInvestment,
+        0,
+    )
+
     return (
         <div className="flex h-full flex-col gap-4">
             <div className="flex h-[40%] gap-4">
@@ -313,15 +388,12 @@ async function DashboardPage() {
                         <Card
                             className="flex gap-4"
                             decoration="top"
-                            decorationColor="teal">
-                            <AccountCardIcon icon="Cash" />
+                            decorationColor="sky">
+                            <AccountCardIcon icon="Database" />
                             <div>
-                                <Text>Balance</Text>
+                                <Text>Total Investments</Text>
                                 <Metric>
-                                    $
-                                    {accountDetails.data[0].balance.toLocaleString(
-                                        "en-US",
-                                    )}
+                                    ${totalInvestment.toLocaleString("en-US")}
                                 </Metric>
                             </div>
                         </Card>
@@ -331,6 +403,11 @@ async function DashboardPage() {
                     <Title className="mb-4 text-2xl font-semibold">
                         Diversity
                     </Title>
+                    <DonutChart
+                        data={investmentPortfolio}
+                        category="shareCount"
+                        index="ticker"
+                    />
                 </Card>
             </div>
             <div className="flex h-[60%] gap-4">
@@ -352,8 +429,14 @@ async function DashboardPage() {
                 </Card>
                 <Card className="w-4/6">
                     <Title className="mb-4 text-2xl font-semibold">
-                        Portfolio Performance
+                        Portfolio Value
                     </Title>
+                    <BarChart
+                        data={investmentPortfolio}
+                        categories={["totalInvestment"]}
+                        index={"ticker"}
+                        autoMinValue
+                    />
                 </Card>
             </div>
         </div>

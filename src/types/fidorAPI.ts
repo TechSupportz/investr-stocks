@@ -1,13 +1,13 @@
 export const fidorBaseURL: string = "https://api.tp.sandbox.fidorfzco.com"
 
-export interface FidorPaginationSchema {
+export interface FidorPagination {
     current_page: number
     per_page: number
     total_entries: number
     total_pages: number
 }
 
-export interface FidorAccountSchema {
+export interface FidorAccount {
     id: string
     account_number?: string
     iban?: string
@@ -19,9 +19,9 @@ export interface FidorAccountSchema {
     nick: string
 }
 
-export interface FidorAccountResponseSchema {
-    data: FidorAccountSchema[]
-    collection: FidorPaginationSchema
+export interface FidorAccountResponse {
+    data: FidorAccount[]
+    collection: FidorPagination
 }
 
 export interface FidorTransaction {
@@ -46,5 +46,5 @@ export interface FidorTransaction {
 
 export interface FidorTransactionsResponse {
     data: FidorTransaction[]
-    collection: FidorPaginationSchema
+    collection: FidorPagination
 }

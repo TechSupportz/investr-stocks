@@ -2,6 +2,7 @@
 
 import {
     CashIcon,
+    DatabaseIcon,
     IdentificationIcon,
     LibraryIcon,
 } from "@heroicons/react/outline"
@@ -9,7 +10,7 @@ import { Icon } from "@tremor/react"
 import React from "react"
 
 interface AccountCardIconProps {
-    icon: "Identification" | "Library" | "Cash"
+    icon: "Identification" | "Library" | "Cash" | "Database"
 }
 
 function AccountCardIcon({ icon }: AccountCardIconProps) {
@@ -32,6 +33,12 @@ function AccountCardIcon({ icon }: AccountCardIconProps) {
 
     if (icon === "Cash") {
         return <Icon icon={CashIcon} variant="light" size="xl" color="teal" />
+    }
+
+    if (icon === "Database") {
+        return (
+            <Icon icon={DatabaseIcon} variant="light" size="xl" color="teal" />
+        )
     }
 }
 

@@ -15,3 +15,9 @@ export interface UserStocks {
         totalInvestment: number
     }
 }
+
+export interface UserPortfolio {
+    ticker: string
+    shareCount: number
+    totalInvestment: number
+}
