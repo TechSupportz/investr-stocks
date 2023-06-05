@@ -33,6 +33,10 @@ async function getStockSummary(ticker: string, mock: boolean) {
         }
     }
 
+    const exchangeRateRes = await fetch(
+        "https://api.exchangerate.host/latest?base=USD&symbols=SGD&places=2",
+    )
+
     console.log("fetching stock summary")
     const intradayRes = await fetch(
         `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${ticker}&interval=1min&apikey=${process.env.ALPHA_VANTAGE_API_KEY}`,
@@ -53,10 +57,11 @@ async function getStockSummary(ticker: string, mock: boolean) {
         throw new Error("Failed to fetch stock summary")
     }
 
-    let [intraday, quote, overview] = await Promise.all([
+    let [intraday, quote, overview, exchangeRate] = await Promise.all([
         intradayRes.json(),
         quoteRes.json(),
         overviewRes.json(),
+        exchangeRateRes.json(),
     ])
 
     if (!intraday || !quote || !overview) {
@@ -81,6 +86,15 @@ async function getStockSummary(ticker: string, mock: boolean) {
         console.log("Alpha Vantage Overview API rate limit exceeded")
     }
 
+    if (exchangeRate.rates.SGD) {
+        console.log(">>> exchangeRate", exchangeRate)
+        exchangeRate = exchangeRate.rates.SGD
+    }
+
+    if (!exchangeRate.rates.SGD) {
+        console.log(">>> exchangeRate", "Unable to fetch exchange rate")
+        exchangeRate = 1.36
+    }
     // console.log(
     //     ">>> Response Data",
     //     intraday["Time Series (1min)"][
@@ -103,14 +117,15 @@ async function getStockSummary(ticker: string, mock: boolean) {
     const response: StockSummaryType = {
         company: overview?.Name ?? "",
         sharePrice: {
-            current: parseFloat(
-                intraday["Time Series (1min)"][
-                    Object.keys(intraday["Time Series (1min)"])[0]
-                ]["1. open"] ?? 0,
-            ),
-            previous: parseFloat(
-                quote["Global Quote"]["08. previous close"] ?? 0,
-            ),
+            current:
+                parseFloat(
+                    intraday["Time Series (1min)"][
+                        Object.keys(intraday["Time Series (1min)"])[0]
+                    ]["1. open"] ?? 0,
+                ) * exchangeRate,
+            previous:
+                parseFloat(quote["Global Quote"]["08. previous close"] ?? 0) *
+                exchangeRate,
         },
         volume: {
             current: parseFloat(

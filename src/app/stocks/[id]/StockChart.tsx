@@ -49,11 +49,18 @@ async function getStockData(ticker: string, interval: DataInterval) {
         `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${ticker}&interval=5min&apikey=${process.env.ALPHAVANTAGE_API_KEY}`,
     )
 
+    const exchangeRateRes = await fetch(
+        "https://api.exchangerate.host/latest?base=USD&symbols=SGD&places=2",
+    )
+
     if (!stockRes.ok) {
         throw new Error("Failed to fetch stock data")
     }
 
-    const stockData = await stockRes.json()
+    let [stockData, exchangeRate] = await Promise.all([
+        stockRes.json(),
+        exchangeRateRes.json(),
+    ])
 
     if (!stockData) {
         throw new Error("Stock data undefined")
@@ -64,6 +71,16 @@ async function getStockData(ticker: string, interval: DataInterval) {
         return []
     }
 
+    if (exchangeRate.rates.SGD) {
+        console.log(">>> exchangeRate", exchangeRate)
+        exchangeRate = exchangeRate.rates.SGD
+    }
+
+    if (!exchangeRate.rates.SGD) {
+        console.log(">>> exchangeRate", "Unable to fetch exchange rate")
+        exchangeRate = 1.36
+    }
+
     const response: StockChartData[] = Object.entries(
         stockData["Time Series (5min)"],
     )
@@ -72,7 +89,7 @@ async function getStockData(ticker: string, interval: DataInterval) {
                 time: DateTime.fromFormat(key, "yyyy-MM-dd HH:mm:ss").toFormat(
                     "HH:mm",
                 ),
-                stockPrice: parseFloat(value["1. open"]),
+                stockPrice: parseFloat(value["1. open"]) * exchangeRate,
             }
         })
         .reverse()

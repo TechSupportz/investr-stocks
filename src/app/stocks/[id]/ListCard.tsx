@@ -59,11 +59,18 @@ async function getStockDetails({ ticker, type }: ListCardProps) {
         `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${ticker}&apikey=${process.env.ALPHA_VANTAGE_API_KEY}`,
     )
 
+    const exchangeRateRes = await fetch(
+        "https://api.exchangerate.host/latest?base=USD&symbols=SGD&places=2",
+    )
+
     if (!quoteRes.ok) {
         throw new Error("Failed to fetch stock card details")
     }
 
-    const quote = await quoteRes.json()
+    let [quote, exchangeRate] = await Promise.all([
+        quoteRes.json(),
+        exchangeRateRes.json(),
+    ])
 
     if (!quote) {
         throw new Error("Stock card details undefined")
@@ -73,22 +80,41 @@ async function getStockDetails({ ticker, type }: ListCardProps) {
         throw new Error("Alpha Vantage API rate limit exceeded")
     }
 
+    if (exchangeRate.rates.SGD) {
+        console.log(">>> exchangeRate", exchangeRate)
+        exchangeRate = exchangeRate.rates.SGD
+    }
+
+    if (!exchangeRate.rates.SGD) {
+        console.log(">>> exchangeRate", "Unable to fetch exchange rate")
+        exchangeRate = 1.36
+    }
+
     const response = [
         {
             title: "Open",
-            value: quote["Global Quote"]["02. open"].slice(0, 6),
+            value:
+                parseFloat(quote["Global Quote"]["02. open"].slice(0, 6)) *
+                exchangeRate,
         },
         {
             title: "High",
-            value: quote["Global Quote"]["03. high"].slice(0, 6),
+            value:
+                parseFloat(quote["Global Quote"]["03. high"].slice(0, 6)) *
+                exchangeRate,
         },
         {
             title: "Low",
-            value: quote["Global Quote"]["04. low"].slice(0, 6),
+            value:
+                parseFloat(quote["Global Quote"]["04. low"].slice(0, 6)) *
+                exchangeRate,
         },
         {
             title: "Previous Close",
-            value: quote["Global Quote"]["08. previous close"].slice(0, 6),
+            value:
+                parseFloat(
+                    quote["Global Quote"]["08. previous close"].slice(0, 6),
+                ) * exchangeRate,
         },
     ]
 

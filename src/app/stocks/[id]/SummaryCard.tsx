@@ -11,11 +11,18 @@ async function getStockDetails(ticker: string) {
         `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${ticker}&apikey=${process.env.ALPHA_VANTAGE_API_KEY}`,
     )
 
+    const exchangeRateRes = await fetch(
+        "https://api.exchangerate.host/latest?base=USD&symbols=SGD&places=2",
+    )
+
     if (!quoteRes.ok) {
         throw new Error("Failed to fetch stock card details")
     }
 
-    const quote = await quoteRes.json()
+    let [quote, exchangeRate] = await Promise.all([
+        quoteRes.json(),
+        exchangeRateRes.json(),
+    ])
 
     if (!quote) {
         throw new Error("Stock card details undefined")
@@ -25,9 +32,23 @@ async function getStockDetails(ticker: string) {
         throw new Error("Alpha Vantage API rate limit exceeded")
     }
 
+    if (exchangeRate.rates.SGD) {
+        console.log(">>> exchangeRate", exchangeRate)
+        exchangeRate = exchangeRate.rates.SGD
+    }
+
+    if (!exchangeRate.rates.SGD) {
+        console.log(">>> exchangeRate", "Unable to fetch exchange rate")
+        exchangeRate = 1.36
+    }
+
     const response = {
-        buy: quote["Global Quote"]["05. price"].slice(0, 6),
-        sell: quote["Global Quote"]["04. low"].slice(0, 6),
+        buy:
+            parseFloat(quote["Global Quote"]["05. price"].slice(0, 6)) *
+            exchangeRate,
+        sell:
+            parseFloat(quote["Global Quote"]["04. low"].slice(0, 6)) *
+            exchangeRate,
         isUp: quote["Global Quote"]["09. change"][0] !== "-",
     }
 
