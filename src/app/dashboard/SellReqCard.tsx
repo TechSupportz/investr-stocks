@@ -8,6 +8,7 @@ interface SellReqCardProps {
     receiver: string
     amount: number
     shareCount: number
+    sharePrice: number
     ticker: string
     id: string
     token: string
@@ -27,6 +28,7 @@ function SellReqCard(props: SellReqCardProps) {
                 amount: props.amount,
                 ticker: props.ticker,
                 shareCount: props.shareCount,
+                sharePrice: props.sharePrice,
                 reqID: props.id,
                 token: props.token,
             }),
@@ -43,7 +45,27 @@ function SellReqCard(props: SellReqCardProps) {
     }
 
     const reject = () => {
-        console.log("reject")
+        setIsBuyLoading(true)
+        fetch("/api/stocks/sell/reject", {
+            method: "POST",
+            body: JSON.stringify({
+                receiver: props.receiver,
+                amount: props.amount,
+                ticker: props.ticker,
+                shareCount: props.shareCount,
+                sharePrice: props.sharePrice,
+                reqID: props.id,
+            }),
+        })
+            .then(res => res.json())
+            .then(data => {
+                console.log(data)
+                if (data) {
+                    setIsDeleted(true)
+                }
+            })
+            .catch(err => console.log(err))
+            .finally(() => setIsBuyLoading(false))
     }
 
     return (

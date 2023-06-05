@@ -27,7 +27,7 @@ export async function POST(req: Request) {
         {
             [id]: {
                 amount,
-                receiver: email,
+                receiver: accountId,
                 shareCount,
                 sharePrice,
                 ticker,

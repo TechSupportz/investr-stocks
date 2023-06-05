@@ -49,6 +49,7 @@ async function DashboardPage() {
                                     amount={sellRequests[key].amount}
                                     receiver={sellRequests[key].receiver}
                                     shareCount={sellRequests[key].shareCount}
+                                    sharePrice={sellRequests[key].sharePrice}
                                     ticker={sellRequests[key].ticker}
                                     token={session.accessToken}
                                 />

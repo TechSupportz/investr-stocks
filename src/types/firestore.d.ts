@@ -2,6 +2,7 @@ export interface SellRequests {
     [key: string]: {
         amount: number
         receiver: string
+        accountID: string
         shareCount: number
         sharePrice: number
         ticker: string
