@@ -114,55 +114,55 @@ async function getInvestmentPortfolio(accountId: string) {
 }
 
 async function DashboardPage() {
-    // const session = await getServerSession(authOptions)
+    const session = await getServerSession(authOptions)
     //FIXME - this is a hack to get around the fact that fidor dies after 12am
-    const session: Session = {
-        user: {
-            id: "37378142",
-            email: "customerB1@example.com",
-        },
-        accessToken: "test",
-        refreshToken: "test",
-        expires: "test",
-        expiresAt: 1234,
-    }
-
-    // if (!session) {
-    //     redirect("/")
+    // const session: Session = {
+    //     user: {
+    //         id: "37378142",
+    //         email: "customerB1@example.com",
+    //     },
+    //     accessToken: "test",
+    //     refreshToken: "test",
+    //     expires: "test",
+    //     expiresAt: 1234,
     // }
 
+    if (!session) {
+        redirect("/")
+    }
+
     //FIXME -  this is a hack to get around the fact that fidor dies after 12am
-    // const accountDetails = await getAccountDetails(session.accessToken)
-    // const transactions = await getTransactions(session.accessToken)
+    const accountDetails = await getAccountDetails(session.accessToken)
+    const transactions = await getTransactions(session.accessToken)
 
     // console.log(">>> Account details", accountDetails)
-    const accountDetails: FidorAccountResponse = {
-        collection: {
-            current_page: 1,
-            per_page: 100,
-            total_entries: 0,
-            total_pages: 0,
-        },
-        data: [
-            {
-                id: "1234",
-                bic: "1234",
-                created_at: "2021-10-10T10:10:10Z",
-                updated_at: "2021-10-10T10:10:10Z",
-                nick: "",
-                balance: 100000,
-            },
-        ],
-    }
-    const transactions: FidorTransactionsResponse = {
-        collection: {
-            current_page: 1,
-            per_page: 100,
-            total_entries: 0,
-            total_pages: 0,
-        },
-        data: [],
-    }
+    // const accountDetails: FidorAccountResponse = {
+    //     collection: {
+    //         current_page: 1,
+    //         per_page: 100,
+    //         total_entries: 0,
+    //         total_pages: 0,
+    //     },
+    //     data: [
+    //         {
+    //             id: "1234",
+    //             bic: "1234",
+    //             created_at: "2021-10-10T10:10:10Z",
+    //             updated_at: "2021-10-10T10:10:10Z",
+    //             nick: "",
+    //             balance: 100000,
+    //         },
+    //     ],
+    // }
+    // const transactions: FidorTransactionsResponse = {
+    //     collection: {
+    //         current_page: 1,
+    //         per_page: 100,
+    //         total_entries: 0,
+    //         total_pages: 0,
+    //     },
+    //     data: [],
+    // }
 
     // console.log(">>> Account details", accountDetails)
 
@@ -379,7 +379,7 @@ async function DashboardPage() {
                                 <Text>Balance</Text>
                                 <Metric>
                                     $
-                                    {accountDetails.data[0].balance.toLocaleString(
+                                    {accountDetails.data[0].balance?.toLocaleString(
                                         "en-US",
                                     )}
                                 </Metric>
