@@ -25,7 +25,7 @@ export default async function RootLayout({
                 <NextAuthProvider>
                     <Navbar />
                     <div className="container m-auto h-[85vh]">
-                        {session ? (
+                        {/* {session ? (
                             children
                         ) : (
                             <>
@@ -33,7 +33,8 @@ export default async function RootLayout({
                                     You are not logged in
                                 </div>
                             </>
-                        )}
+                        )} */}
+                        {children}
                     </div>
                 </NextAuthProvider>
             </body>

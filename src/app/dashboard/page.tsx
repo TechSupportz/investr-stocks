@@ -1,6 +1,7 @@
 import { db } from "@/firebase"
 import { SellRequests } from "@/types/firestore"
 import {
+    Button,
     Card,
     Metric,
     Table,
@@ -20,6 +21,7 @@ import AccountCardIcon from "./AccountCardIcon"
 import SellReqCard from "./SellReqCard"
 import { FidorTransactionsResponse } from "@/types/fidorAPI"
 import { DateTime } from "luxon"
+import TransactionCard, { TransactionCardProps } from "./TransactionCard"
 
 async function getSellRequests() {
     const docRef = doc(db, "admin", "sellRequests")
@@ -57,7 +59,7 @@ async function getAccountDetails(access_token: string) {
 
 async function getTransactions(access_token: string) {
     const res = await fetch(
-        `https://api.tp.sandbox.fidorfzco.com/transactions`,
+        `https://api.tp.sandbox.fidorfzco.com/transactions?per_page=100`,
         {
             method: "GET",
             headers: {
@@ -65,7 +67,13 @@ async function getTransactions(access_token: string) {
                 accept: "application/vnd.fidor.de; version=1,text/json",
             },
             cache: "no-store",
+			next: {
+				tags : [
+					"transactions"
+				]
+			}
         },
+		
     )
 
     if (!res.ok) {
@@ -175,9 +183,11 @@ async function DashboardPage() {
                         </div>
                     </Card>
                     <Card className="h-2/3 overflow-hidden">
-                        <Title className="mb-4 text-2xl font-semibold">
-                            Your transactions
-                        </Title>
+                        <div className="flex justify-between">
+                            <Title className="mb-4 text-2xl font-semibold">
+                                Your transactions
+                            </Title>
+                        </div>
                         <div className="max-h-full overflow-scroll">
                             <Table>
                                 <TableHead>
@@ -258,15 +268,93 @@ async function DashboardPage() {
         )
     }
 
+    const investmentData = transactions.data
+        .map(transaction => {
+            if (transaction.subject.includes("INVESTR-STOCKS")) {
+                const data = transaction.subject.split("INVESTR-STOCKS - ")[1]
+                const splitData = data.split(" ")
+
+                const shareCount = parseInt(splitData[0])
+                const ticker = splitData[3]
+                const sharePrice = parseFloat(splitData[5])
+
+                return {
+                    shareCount,
+                    ticker,
+                    sharePrice,
+                }
+            }
+        })
+        .filter(item => !!item)
+
     return (
         <div className="flex h-full flex-col gap-4">
             <div className="flex h-[40%] gap-4">
-                <Card className="w-4/5"></Card>
-                <Card className="w-1/5"></Card>
+                <Card className="w-4/5">
+                    <Title className="mb-4 text-2xl font-semibold">
+                        Your account
+                    </Title>
+                    <div className="flex gap-4">
+                        <Card
+                            className="flex gap-4"
+                            decoration="top"
+                            decorationColor="teal">
+                            <AccountCardIcon icon="Cash" />
+                            <div>
+                                <Text>Balance</Text>
+                                <Metric>
+                                    $
+                                    {accountDetails.data[0].balance.toLocaleString(
+                                        "en-US",
+                                    )}
+                                </Metric>
+                            </div>
+                        </Card>
+                        <Card
+                            className="flex gap-4"
+                            decoration="top"
+                            decorationColor="teal">
+                            <AccountCardIcon icon="Cash" />
+                            <div>
+                                <Text>Balance</Text>
+                                <Metric>
+                                    $
+                                    {accountDetails.data[0].balance.toLocaleString(
+                                        "en-US",
+                                    )}
+                                </Metric>
+                            </div>
+                        </Card>
+                    </div>
+                </Card>
+                <Card className="w-1/5">
+                    <Title className="mb-4 text-2xl font-semibold">
+                        Diversity
+                    </Title>
+                </Card>
             </div>
             <div className="flex h-[60%] gap-4">
-                <Card className="w-2/6"></Card>
-                <Card className="w-4/6"></Card>
+                <Card className="w-2/6 overflow-hidden">
+                    <Title className="mb-4 text-2xl font-semibold">
+                        Latest investments
+                    </Title>
+                    <div className="flex max-h-full flex-col gap-3 overflow-y-scroll px-2 py-1 pb-5">
+                        {investmentData.map(investment =>
+                            investment
+                                ? TransactionCard({
+                                      price: investment.sharePrice,
+                                      shares: investment.shareCount,
+                                      ticker: investment.ticker,
+                                  })
+                                : null,
+                        )}
+                    </div>
+                </Card>
+                <Card className="w-4/6">
+                    <Title className="mb-4 text-2xl font-semibold">
+                        Portfolio Performance
+                    </Title>
+                </Card>
             </div>
         </div>
     )

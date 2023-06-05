@@ -2,6 +2,7 @@
 
 import { CheckIcon, XIcon } from "@heroicons/react/outline"
 import { Button, Card, Metric, Text } from "@tremor/react"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
 
 interface SellReqCardProps {
@@ -15,6 +16,7 @@ interface SellReqCardProps {
 }
 
 function SellReqCard(props: SellReqCardProps) {
+    const router = useRouter()
     const [isSellLoading, setIsSellLoading] = useState(false)
     const [isBuyLoading, setIsBuyLoading] = useState(false)
     const [isDeleted, setIsDeleted] = useState(false)
@@ -38,6 +40,7 @@ function SellReqCard(props: SellReqCardProps) {
                 console.log(data)
                 if (data) {
                     setIsDeleted(true)
+                    router.refresh()
                 }
             })
             .catch(err => console.log(err))

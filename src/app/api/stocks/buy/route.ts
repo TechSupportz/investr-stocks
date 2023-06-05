@@ -17,12 +17,12 @@ export async function POST(req: Request) {
         !sharePrice ||
         !shareCount
     ) {
-        return {
-            status: 400,
-            body: {
+        return NextResponse.json(
+            {
                 error: "Missing required fields. Please send token, accountId, amount, ticker, sharePrice and shareCount.",
             },
-        }
+            { status: 400 },
+        )
     }
 
     const body = {

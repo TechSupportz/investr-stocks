@@ -96,7 +96,9 @@ async function SummaryCard(props: SummaryCardProps) {
                                     {userInvestments.returns.toFixed(2)}%
                                 </BadgeDelta>
                             </div>
-                            <Metric>${userInvestments.totalInvestment}</Metric>
+                            <Metric>
+                                ${userInvestments.totalInvestment.toFixed(2)}
+                            </Metric>
                         </>
                     ) : (
                         <Text>You have no investments in this stock</Text>
