@@ -12,13 +12,46 @@ interface searchParams {
     [key: string]: string | string[] | undefined
 }
 
-function StockPage({
+async function isStockReal(ticker: string) {
+    const res = await fetch(
+        `https://www.alphavantage.co/query?function=OVERVIEW&symbol=${ticker}&apikey=${process.env.ALPHA_VANTAGE_API_KEY}`,
+    )
+
+    if (!res.ok) {
+        throw new Error("Failed to fetch stock summary")
+    }
+
+    const overview = await res.json()
+
+    if ((overview as any).Note) {
+        console.log("Alpha Vantage earnings API rate limit exceeded")
+        return false
+    }
+
+    if (Object.keys(overview).length === 0) {
+        return false
+    }
+
+    return true
+}
+
+async function StockPage({
     params,
     searchParams,
 }: {
     params: { id: string }
     searchParams: searchParams
 }) {
+    const isValidStock = await isStockReal(params.id)
+
+    if (!isValidStock) {
+        return (
+            <div className="flex h-full w-full items-center justify-center">
+                <Text className="text-2xl">Stock not found</Text>
+            </div>
+        )
+    }
+
     return (
         <div className="flex h-full gap-4">
             <div className="flex h-full w-[70%] flex-col gap-4">

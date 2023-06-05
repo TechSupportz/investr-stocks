@@ -11,10 +11,13 @@ import { signIn, signOut, useSession } from "next-auth/react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { useState } from "react"
 
 function Navbar() {
     const { data: session } = useSession()
     const router = useRouter()
+
+    const [search, setSearch] = useState("")
 
     const appSignOut = async () => {
         if (!session) {
@@ -29,6 +32,10 @@ function Navbar() {
         })
 
         await signOut()
+    }
+
+    const navigateToStock = () => {
+        router.push(`/stocks/${search}`)
     }
 
     return (
@@ -58,7 +65,18 @@ function Navbar() {
                         </div>
                     </div>
                     <div className="flex items-center space-x-4">
-                        <TextInput icon={SearchIcon} placeholder="Search..." />
+                        <div className="flex gap-1">
+                            <Button
+                                className="pr-2"
+                                disabled={search === ""}
+                                icon={SearchIcon}
+                                onClick={() => navigateToStock()}
+                            />
+                            <TextInput
+                                placeholder="Search..."
+                                onChange={e => setSearch(e.target.value)}
+                            />
+                        </div>
                         {session ? (
                             <Button
                                 icon={LogoutIcon}
