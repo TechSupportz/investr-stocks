@@ -1,12 +1,25 @@
 import { db } from "@/firebase"
 import { SellRequests } from "@/types/firestore"
-import { Card, Metric, Text, Title } from "@tremor/react"
+import {
+    Card,
+    Metric,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeaderCell,
+    TableRow,
+    Text,
+    Title,
+} from "@tremor/react"
 import { doc, getDoc } from "firebase/firestore"
 import { getServerSession } from "next-auth"
 import { redirect } from "next/navigation"
 import { authOptions } from "../api/auth/[...nextauth]/route"
 import AccountCardIcon from "./AccountCardIcon"
 import SellReqCard from "./SellReqCard"
+import { FidorTransactionsResponse } from "@/types/fidorAPI"
+import { DateTime } from "luxon"
 
 async function getSellRequests() {
     const docRef = doc(db, "admin", "sellRequests")
@@ -37,7 +50,9 @@ async function getAccountDetails(access_token: string) {
         throw new Error("Failed to fetch account details")
     }
 
-    return res.json()
+    const data = await res.json()
+
+    return data
 }
 
 async function getTransactions(access_token: string) {
@@ -58,7 +73,9 @@ async function getTransactions(access_token: string) {
         throw new Error("Failed to fetch account details")
     }
 
-    return res.json()
+    const data = (await res.json()) as FidorTransactionsResponse
+
+    return data
 }
 
 async function DashboardPage() {
@@ -157,10 +174,84 @@ async function DashboardPage() {
                             </Card>
                         </div>
                     </Card>
-                    <Card className="h-2/3">
+                    <Card className="h-2/3 overflow-hidden">
                         <Title className="mb-4 text-2xl font-semibold">
                             Your transactions
                         </Title>
+                        <div className="max-h-full overflow-scroll">
+                            <Table>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableHeaderCell>ID</TableHeaderCell>
+                                        <TableHeaderCell>
+                                            Created at
+                                        </TableHeaderCell>
+                                        <TableHeaderCell>
+                                            Recipient
+                                        </TableHeaderCell>
+                                        <TableHeaderCell>
+                                            Amount
+                                        </TableHeaderCell>
+                                        <TableHeaderCell>
+                                            Subject
+                                        </TableHeaderCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {transactions.data.map(transaction =>
+                                        transaction.subject.includes(
+                                            "INVESTR-STOCKS",
+                                        ) ? (
+                                            <TableRow key={transaction.id}>
+                                                <TableCell>
+                                                    {transaction.id}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {DateTime.fromISO(
+                                                        transaction.created_at,
+                                                    ).toLocaleString(
+                                                        DateTime.DATETIME_MED,
+                                                    )}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {
+                                                        transaction
+                                                            .transaction_type_details
+                                                            .recipient
+                                                    }
+                                                </TableCell>
+                                                <TableCell
+                                                    className={
+                                                        transaction.amount < 0
+                                                            ? "text-red-400"
+                                                            : "text-green-400"
+                                                    }>
+                                                    $
+                                                    {transaction.amount < 0
+                                                        ? (
+                                                              transaction.amount /
+                                                              100
+                                                          )
+                                                              .toFixed(2)
+                                                              .slice(1)
+                                                        : (
+                                                              transaction.amount /
+                                                              100
+                                                          ).toFixed(2)}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {
+                                                        transaction.subject.split(
+                                                            "INVESTR-STOCKS - ",
+                                                        )[1]
+                                                    }
+                                                </TableCell>
+                                            </TableRow>
+                                        ) : null,
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </div>
                     </Card>
                 </div>
             </div>
