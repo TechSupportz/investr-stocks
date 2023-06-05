@@ -45,10 +45,12 @@ async function DashboardPage() {
                             Object.keys(sellRequests).map(key => (
                                 <SellReqCard
                                     key={key}
+                                    id={key}
                                     amount={sellRequests[key].amount}
                                     receiver={sellRequests[key].receiver}
                                     shareCount={sellRequests[key].shareCount}
                                     ticker={sellRequests[key].ticker}
+                                    token={session.accessToken}
                                 />
                             ))
                         ) : (

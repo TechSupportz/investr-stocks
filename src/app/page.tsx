@@ -50,6 +50,7 @@ export default async function Home() {
                     </div>
                 )
             })}
+            <Text>{JSON.stringify(account)}</Text>
         </div>
     )
 }

@@ -9,12 +9,6 @@ import React from "react"
 import DataTypeToggle from "./DataTypeToggle"
 import { DateTime } from "luxon"
 
-interface StockChartProps {
-    ticker: string
-    interval: DataInterval
-    data: DataType
-}
-
 async function getCompanyEarnings(ticker: string) {
     const earningsRes = await fetch(
         `https://www.alphavantage.co/query?function=EARNINGS&symbol=${ticker}&apikey=${process.env.ALPHAVANTAGE_API_KEY}}`,
@@ -84,6 +78,12 @@ async function getStockData(ticker: string, interval: DataInterval) {
         .reverse()
 
     return response
+}
+
+interface StockChartProps {
+    ticker: string
+    interval: DataInterval
+    data: DataType
 }
 
 async function StockChart(props: StockChartProps) {
