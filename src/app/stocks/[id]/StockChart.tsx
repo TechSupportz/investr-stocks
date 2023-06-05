@@ -74,9 +74,7 @@ async function getStockData(ticker: string, interval: DataInterval) {
     if (exchangeRate.rates.SGD) {
         console.log(">>> exchangeRate", exchangeRate)
         exchangeRate = exchangeRate.rates.SGD
-    }
-
-    if (!exchangeRate.rates.SGD) {
+    } else {
         console.log(">>> exchangeRate", "Unable to fetch exchange rate")
         exchangeRate = 1.36
     }

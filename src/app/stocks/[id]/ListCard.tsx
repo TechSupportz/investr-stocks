@@ -83,12 +83,10 @@ async function getStockDetails({ ticker, type }: ListCardProps) {
     if (exchangeRate.rates.SGD) {
         console.log(">>> exchangeRate", exchangeRate)
         exchangeRate = exchangeRate.rates.SGD
-    }
-
-    if (!exchangeRate.rates.SGD) {
-        console.log(">>> exchangeRate", "Unable to fetch exchange rate")
-        exchangeRate = 1.36
-    }
+    }else {
+		console.log(">>> exchangeRate", "Unable to fetch exchange rate")
+		exchangeRate = 1.36
+	}
 
     const response = [
         {
