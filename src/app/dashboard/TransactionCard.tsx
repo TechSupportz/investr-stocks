@@ -17,7 +17,7 @@ function TransactionCard(props: TransactionCardProps) {
                 <Text>{props.shares} shares</Text>
             </div>
             <div className="flex flex-col items-end">
-                <BadgeDelta deltaType="increase">4.20%</BadgeDelta>
+                {/* <BadgeDelta deltaType="increase">4.20%</BadgeDelta> */}
                 <Metric className="text-2xl">${props.price.toFixed(2)}</Metric>
             </div>
         </Card>
