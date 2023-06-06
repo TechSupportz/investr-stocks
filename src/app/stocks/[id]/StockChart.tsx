@@ -8,6 +8,7 @@ import { AreaChart, BarChart, Card, LineChart } from "@tremor/react"
 import React from "react"
 import DataTypeToggle from "./DataTypeToggle"
 import { DateTime } from "luxon"
+import IntervalToggle from "./intervalTabs"
 
 async function getCompanyEarnings(ticker: string) {
     const earningsRes = await fetch(
@@ -44,7 +45,7 @@ async function getCompanyEarnings(ticker: string) {
     return earnings
 }
 
-async function getStockData(ticker: string, interval: DataInterval) {
+async function getTodayStockData(ticker: string) {
     const stockRes = await fetch(
         `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${ticker}&interval=5min&apikey=${process.env.ALPHAVANTAGE_API_KEY}`,
     )
@@ -95,6 +96,109 @@ async function getStockData(ticker: string, interval: DataInterval) {
     return response
 }
 
+async function getMonthStockData(ticker: string) {
+    const stockRes = await fetch(
+        `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${ticker}&interval=60min&outputsize=full&apikey=${process.env.ALPHAVANTAGE_API_KEY}`,
+    )
+
+    const exchangeRateRes = await fetch(
+        "https://api.exchangerate.host/latest?base=USD&symbols=SGD&places=2",
+    )
+
+    if (!stockRes.ok) {
+        throw new Error("Failed to fetch stock data")
+    }
+
+    let [stockData, exchangeRate] = await Promise.all([
+        stockRes.json(),
+        exchangeRateRes.json(),
+    ])
+
+    if (!stockData) {
+        throw new Error("Stock data undefined")
+    }
+
+    if ((stockData as any).Note) {
+        console.log("Alpha Vantage stock data API rate limit exceeded")
+        return []
+    }
+
+    if (exchangeRate.rates.SGD) {
+        console.log(">>> exchangeRate", exchangeRate)
+        exchangeRate = exchangeRate.rates.SGD
+    } else {
+        console.log(">>> exchangeRate", "Unable to fetch exchange rate")
+        exchangeRate = 1.36
+    }
+
+    const response: StockChartData[] = Object.entries(
+        stockData["Time Series (60min)"],
+    )
+        .slice(0, 720)
+        .map(([key, value]: any) => {
+            return {
+                time: DateTime.fromFormat(key, "yyyy-MM-dd HH:mm:ss").toFormat(
+                    "dd/MM",
+                ),
+                stockPrice: parseFloat(value["1. open"]) * exchangeRate,
+            }
+        })
+        .reverse()
+
+    return response
+}
+
+async function getMaxStockData(ticker: string) {
+    const stockRes = await fetch(
+        `https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol=${ticker}&apikey=${process.env.ALPHAVANTAGE_API_KEY}`,
+    )
+
+    const exchangeRateRes = await fetch(
+        "https://api.exchangerate.host/latest?base=USD&symbols=SGD&places=2",
+    )
+
+    if (!stockRes.ok) {
+        throw new Error("Failed to fetch stock data")
+    }
+
+    let [stockData, exchangeRate] = await Promise.all([
+        stockRes.json(),
+        exchangeRateRes.json(),
+    ])
+
+    if (!stockData) {
+        throw new Error("Stock data undefined")
+    }
+
+    if ((stockData as any).Note) {
+        console.log("Alpha Vantage stock data API rate limit exceeded")
+        return []
+    }
+
+    if (exchangeRate.rates.SGD) {
+        console.log(">>> exchangeRate", exchangeRate)
+        exchangeRate = exchangeRate.rates.SGD
+    } else {
+        console.log(">>> exchangeRate", "Unable to fetch exchange rate")
+        exchangeRate = 1.36
+    }
+
+    const response: StockChartData[] = Object.entries(
+        stockData["Monthly Time Series"],
+    )
+        .map(([key, value]: any) => {
+            return {
+                time: DateTime.fromFormat(key, "yyyy-MM-dd").toFormat(
+                    "dd/MM/yyyy",
+                ),
+                stockPrice: parseFloat(value["1. open"]) * exchangeRate,
+            }
+        })
+        .reverse()
+
+    return response
+}
+
 interface StockChartProps {
     ticker: string
     interval: DataInterval
@@ -105,11 +209,16 @@ async function StockChart(props: StockChartProps) {
     const chartData =
         props.data === "earnings"
             ? await getCompanyEarnings(props.ticker)
-            : await getStockData(props.ticker, props.interval)
+            : props.interval === "today"
+            ? await getTodayStockData(props.ticker)
+            : props.interval === "month"
+            ? await getMonthStockData(props.ticker)
+            : await getMaxStockData(props.ticker)
 
     return (
         <Card className="h-[55%]">
-            <div className="mb-4 w-full items-end justify-end">
+            <div className="mb-4 flex w-full items-end justify-between">
+                <IntervalToggle />
                 <DataTypeToggle />
             </div>
             {props.data === "earnings" && "symbol" in chartData ? (

@@ -4,6 +4,7 @@ import Navbar from "./components/navbar"
 import "./globals.css"
 import { Inter } from "next/font/google"
 import { authOptions } from "./api/auth/[...nextauth]/route"
+import { Metric } from "@tremor/react"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -25,15 +26,16 @@ export default async function RootLayout({
                 <NextAuthProvider>
                     <Navbar />
                     <div className="container m-auto h-[85vh]">
-                        {/* {session ? (
+                        {session ? (
                             children
                         ) : (
                             <>
                                 <div className="flex h-full flex-col items-center justify-center">
-                                    You are not logged in
+                                    <Metric>Welcome to Investr Stocks</Metric>
+                                    <Metric>Login to get started!</Metric>
                                 </div>
                             </>
-                        )} */}
+                        )}
                         {children}
                     </div>
                 </NextAuthProvider>

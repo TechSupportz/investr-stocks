@@ -14,7 +14,6 @@ interface StockSummaryType {
 
 interface StockSummaryProps {
     ticker: string
-    interval: DataInterval
 }
 
 async function getStockSummary(ticker: string, mock: boolean) {
