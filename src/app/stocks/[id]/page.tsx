@@ -1,16 +1,8 @@
-import {
-    BadgeDelta,
-    Card,
-    List,
-    ListItem,
-    Metric,
-    Text,
-    Title,
-} from "@tremor/react"
+import { DataInterval, DataType } from "@/types/stocks"
+import { Card, Text, Title } from "@tremor/react"
 import ListCard from "./ListCard"
-import StockSummary from "./StockSummary"
-import { DataInterval, DataType, TradeType } from "@/types/stocks"
 import StockChart from "./StockChart"
+import StockSummary from "./StockSummary"
 import SummaryCard from "./SummaryCard"
 
 interface searchParams {
@@ -122,13 +114,13 @@ async function StockPage({
                     }
                 />
                 {/* FIXME - uncomment this after new alphavantage api key */}
-                {/* <div className="flex h-[25%] gap-4">
+                <div className="flex h-[25%] gap-4">
                     <ListCard ticker={params.id} type="Company" />
                     <ListCard ticker={params.id} type="Stock" />
-                </div> */}
+                </div>
             </div>
             <div className="flex h-full w-[30%] flex-col gap-4">
-                {/* <SummaryCard ticker={params.id} /> */}
+                <SummaryCard ticker={params.id} />
                 <Card className="h-2/6">
                     <Title className="mb-4 text-2xl font-semibold">
                         AI Advisor

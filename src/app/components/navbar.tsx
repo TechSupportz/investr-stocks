@@ -57,11 +57,11 @@ function Navbar() {
                                 <Link href="/news">News</Link>
                             </Title>
                             {/*NOTE - Remove this afterwards */}
-                            <Title className="text-red-500">
+                            {/* <Title className="text-red-500">
                                 <Link href="/stocks/AAPL?interval=5D&data=earnings&trade=buy">
                                     TEST STOCK
                                 </Link>
-                            </Title>
+                            </Title> */}
                         </div>
                     </div>
                     <div className="flex items-center space-x-4">

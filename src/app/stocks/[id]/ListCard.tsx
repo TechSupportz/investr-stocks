@@ -83,36 +83,40 @@ async function getStockDetails({ ticker, type }: ListCardProps) {
     if (exchangeRate.rates.SGD) {
         console.log(">>> exchangeRate", exchangeRate)
         exchangeRate = exchangeRate.rates.SGD
-    }else {
-		console.log(">>> exchangeRate", "Unable to fetch exchange rate")
-		exchangeRate = 1.36
-	}
+    } else {
+        console.log(">>> exchangeRate", "Unable to fetch exchange rate")
+        exchangeRate = 1.36
+    }
 
     const response = [
         {
             title: "Open",
-            value:
+            value: (
                 parseFloat(quote["Global Quote"]["02. open"].slice(0, 6)) *
-                exchangeRate,
+                exchangeRate
+            ).toFixed(2),
         },
         {
             title: "High",
-            value:
+            value: (
                 parseFloat(quote["Global Quote"]["03. high"].slice(0, 6)) *
-                exchangeRate,
+                exchangeRate
+            ).toFixed(2),
         },
         {
             title: "Low",
-            value:
+            value: (
                 parseFloat(quote["Global Quote"]["04. low"].slice(0, 6)) *
-                exchangeRate,
+                exchangeRate
+            ).toFixed(2),
         },
         {
             title: "Previous Close",
-            value:
+            value: (
                 parseFloat(
                     quote["Global Quote"]["08. previous close"].slice(0, 6),
-                ) * exchangeRate,
+                ) * exchangeRate
+            ).toFixed(2),
         },
     ]
 

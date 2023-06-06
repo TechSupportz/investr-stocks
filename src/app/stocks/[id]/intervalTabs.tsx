@@ -4,7 +4,11 @@ import { Tab, TabList, Toggle, ToggleItem } from "@tremor/react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useState } from "react"
 
-function IntervalToggle() {
+interface IntervalToggleProps {
+    className?: string
+}
+
+function IntervalToggle({ className }: IntervalToggleProps) {
     const router = useRouter()
     const pathname = usePathname()
     const searchParams = useSearchParams()
@@ -21,6 +25,7 @@ function IntervalToggle() {
 
     return (
         <TabList
+            className={className}
             color="blue"
             defaultValue={searchParams.get("data") ?? "today"}
             value={value}

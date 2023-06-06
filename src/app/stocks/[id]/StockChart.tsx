@@ -218,7 +218,11 @@ async function StockChart(props: StockChartProps) {
     return (
         <Card className="h-[55%]">
             <div className="mb-4 flex w-full items-end justify-between">
-                <IntervalToggle />
+                <IntervalToggle
+                    className={
+                        props.data === "stocks" ? "opacity-100" : "opacity-0"
+                    }
+                />
                 <DataTypeToggle />
             </div>
             {props.data === "earnings" && "symbol" in chartData ? (

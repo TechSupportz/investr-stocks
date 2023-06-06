@@ -10,10 +10,12 @@ export default async function Home() {
     const session = await getServerSession(authOptions)
     // console.log(">>>", session)
 
+    
+
     return (
-        <div>
+        <div className="flex h-full flex-col items-center justify-center">
             <Metric>Welcome to Investr Stocks</Metric>
-            <Metric>Login to get started!</Metric>
+            <Metric>Go to the dashboard or search for a stock!</Metric>
         </div>
     )
 }
