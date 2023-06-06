@@ -96,7 +96,7 @@ async function StockPage({
             </div>
             <div className="flex h-full w-[30%] flex-col gap-4">
                 <SummaryCard ticker={params.id} />
-                <Card className="h-2/6" />
+                <Card className="h-2/6"></Card>
             </div>
         </div>
     )

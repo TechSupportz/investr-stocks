@@ -142,7 +142,9 @@ function PurchaseCard(props: PurchaseCardProps) {
                             props.isUp ? "text-green-500" : "text-red-500"
                         }`}>
                         $
-                        {tradeType === "buy" ? props.buyPrice : props.sellPrice}
+                        {tradeType === "buy"
+                            ? props.buyPrice.toFixed(2)
+                            : props.sellPrice.toFixed(2)}
                     </Text>
                 </div>
                 <div className="flex items-center justify-between">
