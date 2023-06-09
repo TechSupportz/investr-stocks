@@ -4,6 +4,7 @@ import ListCard from "./ListCard"
 import StockChart from "./StockChart"
 import StockSummary from "./StockSummary"
 import SummaryCard from "./SummaryCard"
+import { redirect } from "next/navigation"
 
 interface searchParams {
     interval?: DataInterval
@@ -23,6 +24,7 @@ async function isStockReal(ticker: string) {
     const overview = await res.json()
 
     if ((overview as any).Note) {
+		redirect("/rateLimit")
         console.log("Alpha Vantage earnings API rate limit exceeded")
         return false
     }

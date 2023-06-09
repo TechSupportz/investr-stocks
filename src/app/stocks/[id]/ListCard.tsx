@@ -1,4 +1,5 @@
 import { Card, List, ListItem } from "@tremor/react"
+import { redirect } from "next/navigation"
 
 interface ListItem {
     title: string
@@ -26,6 +27,7 @@ async function getCompanyDetails({ ticker, type }: ListCardProps) {
     }
 
     if (overview.Note) {
+        redirect("/rateLimit")
         throw new Error("Alpha Vantage overview API rate limit exceeded")
     }
 
@@ -77,6 +79,7 @@ async function getStockDetails({ ticker, type }: ListCardProps) {
     }
 
     if (quote.Note) {
+        redirect("/rateLimit")
         throw new Error("Alpha Vantage API rate limit exceeded")
     }
 

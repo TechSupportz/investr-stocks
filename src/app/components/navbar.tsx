@@ -56,12 +56,6 @@ function Navbar() {
                             <Title>
                                 <Link href="/news">News</Link>
                             </Title>
-                            {/*NOTE - Remove this afterwards */}
-                            {/* <Title className="text-red-500">
-                                <Link href="/stocks/AAPL?interval=5D&data=earnings&trade=buy">
-                                    TEST STOCK
-                                </Link>
-                            </Title> */}
                         </div>
                     </div>
                     <div className="flex items-center space-x-4">
@@ -81,7 +75,7 @@ function Navbar() {
                             <Button
                                 icon={LogoutIcon}
                                 onClick={() => appSignOut()}>
-                                Logout
+                                {session.user.email}
                             </Button>
                         ) : (
                             <Button

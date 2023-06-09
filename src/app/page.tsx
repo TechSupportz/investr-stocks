@@ -1,17 +1,8 @@
+import { Metric } from "@tremor/react"
 import { getServerSession } from "next-auth"
 import { authOptions } from "./api/auth/[...nextauth]/route"
-import { Metric, Text } from "@tremor/react"
-import { db } from "@/firebase"
-import { collection, doc, getDoc, getDocs } from "firebase/firestore"
-import { SellRequests } from "@/types/firestore"
-import { redirect } from "next/navigation"
 
-export default async function Home() {
-    const session = await getServerSession(authOptions)
-    // console.log(">>>", session)
-
-    
-
+export default function Home() {
     return (
         <div className="flex h-full flex-col items-center justify-center">
             <Metric>Welcome to Investr Stocks</Metric>

@@ -7,9 +7,9 @@ import { redirect } from "next/navigation"
 function DashboardLoading() {
     const { data: session } = useSession()
 
-    if (!session) {
-        redirect("/")
-    }
+    // if (!session) {
+    //     redirect("/")
+    // }
 
     if (
         session?.user.id === "95933444" &&

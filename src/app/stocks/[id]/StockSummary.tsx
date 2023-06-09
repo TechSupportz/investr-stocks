@@ -1,5 +1,6 @@
 import { DataInterval } from "@/types/stocks"
 import { Card, Metric, BadgeDelta, Text } from "@tremor/react"
+import { redirect } from "next/navigation"
 
 type CurrPrevMetrics = {
     current: number
@@ -70,18 +71,21 @@ async function getStockSummary(ticker: string, mock: boolean) {
     if (intraday.Note) {
         console.log(">>> intraday", intraday)
         intraday = null
+        redirect("/rateLimit")
         console.log("Alpha Vantage Intraday API rate limit exceeded")
     }
 
     if (quote.Note) {
         console.log(">>> quote", quote)
         quote = null
+        redirect("/rateLimit")
         console.log("Alpha Vantage Quote API rate limit exceeded")
     }
 
     if (overview.Note) {
         console.log(">>> overview", overview)
         overview = null
+        redirect("/rateLimit")
         console.log("Alpha Vantage Overview API rate limit exceeded")
     }
 

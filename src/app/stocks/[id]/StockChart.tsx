@@ -9,6 +9,7 @@ import React from "react"
 import DataTypeToggle from "./DataTypeToggle"
 import { DateTime } from "luxon"
 import IntervalToggle from "./intervalTabs"
+import { redirect } from "next/navigation"
 
 async function getCompanyEarnings(ticker: string) {
     const earningsRes = await fetch(
@@ -26,6 +27,7 @@ async function getCompanyEarnings(ticker: string) {
     }
 
     if ((earnings as any).Note) {
+        redirect("/rateLimit")
         console.log("Alpha Vantage earnings API rate limit exceeded")
         return {
             symbol: ticker,
@@ -68,6 +70,7 @@ async function getTodayStockData(ticker: string) {
     }
 
     if ((stockData as any).Note) {
+        redirect("/rateLimit")
         console.log("Alpha Vantage stock data API rate limit exceeded")
         return []
     }
@@ -119,6 +122,7 @@ async function getMonthStockData(ticker: string) {
     }
 
     if ((stockData as any).Note) {
+        redirect("/rateLimit")
         console.log("Alpha Vantage stock data API rate limit exceeded")
         return []
     }
@@ -171,6 +175,7 @@ async function getMaxStockData(ticker: string) {
     }
 
     if ((stockData as any).Note) {
+        redirect("/rateLimit")
         console.log("Alpha Vantage stock data API rate limit exceeded")
         return []
     }

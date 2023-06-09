@@ -5,6 +5,7 @@ import { doc, getDoc } from "firebase/firestore"
 import PurchaseCard from "./PurchaseCard"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { getServerSession } from "next-auth"
+import { redirect } from "next/navigation"
 
 async function getStockDetails(ticker: string) {
     const quoteRes = await fetch(
@@ -29,6 +30,7 @@ async function getStockDetails(ticker: string) {
     }
 
     if (quote.Note) {
+        redirect("/rateLimit")
         throw new Error("Alpha Vantage API rate limit exceeded")
     }
 
